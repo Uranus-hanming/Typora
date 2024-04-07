@@ -299,6 +299,9 @@ CREATE DATABASE `库名` CHARACTER SET 'utf8mb4';
 # 给账号授权数据库
 GRANT ALL PRIVILEGES ON `库名`.* TO '你的账号'@'%';
 
+# 给root用户分配权限：
+alter user 'root'@'%' identified with mysql_native_password by '123456';
+
 # 刷新权限
 FLUSH PRIVILEGES;
 ```
