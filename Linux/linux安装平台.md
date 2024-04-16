@@ -1173,6 +1173,32 @@ python3 -V
   11、删除3306端口配置。
       firewall-cmd --zone=public --remove-port=3306/tcp --permanent 
 
+##### 虚拟环境配置
+
+1. 安装virtualenv
+
+   ```
+   pip install virtualenv
+   ```
+
+2. 创建虚拟环境
+
+   ```
+   virtualenv venv
+   ```
+
+3. 激活虚拟环境
+
+   ```
+   source venv/bin/activate
+   ```
+
+4. 退出虚拟环境
+
+   ```
+   deactivate
+   ```
+
 ##### 其他问题
 
 - 一个应用程序的文件类型有哪些？
