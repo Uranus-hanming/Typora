@@ -1,0 +1,4 @@
+<!--pages/market/market.wxml-->
+<!-- <text>pages/market/market.wxml</text> -->
+
+<view wx:for="{{ numList }}" wx:key="*this">{{ item }}</view>

@@ -1,0 +1,40 @@
+<!--pages/index/banner/banner.wxml-->
+<!-- 轮播图 -->
+<view class="swiper-box">
+  <!-- swiper 滑块视图容器，用来绘制轮播图 -->
+  <swiper
+    autoplay
+    class="swiper"
+    indicator-active-color="#FF734C"
+    interval="2000"
+    duration="1000"
+    indicator-color="rgba(0, 0, 0, .3)"
+    bindchange="getSwiperIndex"
+  >
+    <!-- 通过 block 标签对 轮播图数据 进行渲染 -->
+    <block wx:for="{{ bannerList }}" wx:key="index">
+      <!-- swiper-item 单个滑块视图容器，每一张轮播图 -->
+      <swiper-item class="swiper-item">
+        <!-- 通过 navigator 组件实现页面的跳转 -->
+        <navigator
+          class="navigator"
+          url="/modules/goodModule/pages/goods/detail/detail?goodsId={{ item.id }}"
+          hover-class="none"
+        >
+          <image class="img" src="{{ item.imageUrl }}"></image>
+        </navigator>
+      </swiper-item>
+    </block>
+  </swiper>
+
+  <!-- 轮播图的面板指示点，因为面板指示点不支持自定义，所以我们只能通过自定义结构的方式 -->
+  <view class="indicator">
+    <!-- active 类名：当前被激活的面板指示点颜色 -->
+    <!-- rectangle 类名：默认的面板指示点颜色 -->
+    <text
+      wx:for="{{bannerList.length}}"
+      wx:key="id"
+      class="{{  index === activeIndex ? 'active rectangle' : 'rectangle' }}"
+    ></text>
+  </view>
+</view>

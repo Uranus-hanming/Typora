@@ -1,0 +1,12 @@
+<!--components/custom01/custom01.wxml-->
+<!-- <text>components/custom01/custom01.wxml</text> -->
+
+<view>
+  <slot name="slot-top" />
+  <!-- slot 就是用来接收、承载子节点内容 -->
+  <!-- slot 只是一个占位符，子节点内容会将 slot 进行替换 -->
+  <!-- 默认插槽 -->
+  <view><slot /></view>
+
+  <slot name="slot-bottom" />
+</view>

@@ -1,0 +1,55 @@
+
+
+<!-- 如果需要进行列表渲染，需要使用 wx:for 属性 -->
+<!-- 属性值需要使用双大括号进行包裹 -->
+<!-- 每一项的变量名默认是 item -->
+<!-- 每一项下标（索引）的变量名默认是 index -->
+
+<!-- 如果渲染的是数组，item：数组的每一项，index：下标 -->
+<!-- <view wx:for="{{ numList }}">{{ item }} - {{ index }}</view> -->
+
+<!-- 如果渲染的是对象，item：对象属性的值，index：对象属性 -->
+<!-- <view wx:for="{{ obj }}">{{ item }} - {{ index }}</view> -->
+
+<!-- wx:key 提升性能 -->
+<!-- wx:key 属性值有两种添加形式 -->
+<!-- 1. 字符串，需要是遍历的数组 中 item 的某个属性，要求该属性是列表中唯一的字符串或者数字，不能进行动态改变 -->
+<!-- 2. 保留关键字 *this，*this 代表的是 item 本身，item 本身是唯一的字符串或者数字 -->
+
+<!-- wx:key 的属性值不需要使用双大括号进行包裹，直接写遍历的数组 中 item 的某个属性 -->
+<view wx:for="{{ fruitList }}" wx:key="id">{{ item.name }}</view>
+
+<view wx:for="{{ fruitList }}" wx:key="index">{{ item.name }}</view>
+
+<view wx:for="{{ numList }}" wx:key="*this">{{ item }}</view>
+
+
+<view class="line"></view>
+
+<!-- 如果需要修改默认的变量名，需要使用 wx:for-item 属性 -->
+<!-- 如果需要修改默认的下标变量名，需要使用 wx:for-index 属性 -->
+<!-- 两个属性需要和 wx:for 写到同一个组件上 -->
+<!-- 再重命名、修改以后，需要使用最新的变量名 -->
+<!-- 数组 -->
+<view wx:for="{{ fruitList }}" wx:key="id" wx:for-item="fruitItem" wx:for-index="i">
+  {{ fruitItem.name }}
+</view>
+
+<!-- 对象 -->
+<view wx:for="{{ obj }}" wx:key="key" wx:for-item="value" wx:for-index="key">
+  {{ value }} - {{ key }}
+</view>
+
+
+<!-- <view wx:for="{{ fruitList }}" wx:key="id" wx:for-item="fruitItem" wx:for-index="i">
+  <view>名字：{{ fruitItem.name }}</view>
+  <view>价格：{{ fruitItem.price }}</view>
+</view> -->
+
+<!-- block 不是一个组件，只是渲染元素 -->
+<!-- 也就是只是包装元素，可以组织代码结构，支持列表渲染 -->
+<!-- block 不会在页面中做任何渲染，只接受控制属性 -->
+<block wx:for="{{ fruitList }}" wx:key="id" wx:for-item="fruitItem" wx:for-index="i">
+  <view>名字：{{ fruitItem.name }}</view>
+  <view>价格：{{ fruitItem.price }}</view>
+</block>

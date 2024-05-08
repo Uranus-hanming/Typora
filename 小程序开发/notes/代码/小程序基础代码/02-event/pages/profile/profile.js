@@ -1,0 +1,2 @@
+// profile.js
+Page({})

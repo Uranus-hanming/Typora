@@ -1,0 +1,10 @@
+/* pages/cate/cate.wxss */
+
+.custom-swiper {
+  height: 440rpx;
+}
+
+.custom-swiper image {
+  height: 100%;
+  width: 100%;
+}

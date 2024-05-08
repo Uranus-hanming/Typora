@@ -1,0 +1,4 @@
+<!--components/custom06/custom06.wxml-->
+<!-- <text>components/custom06/custom06.wxml</text> -->
+
+<view>{{ name }}</view>

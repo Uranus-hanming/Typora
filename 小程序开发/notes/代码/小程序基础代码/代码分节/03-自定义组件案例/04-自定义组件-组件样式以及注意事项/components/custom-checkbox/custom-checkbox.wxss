@@ -1,0 +1,26 @@
+/* components/custom-checkbox/custom-checkbox.wxss */
+
+.custom-checkbox-container {
+  display: inline-block;
+}
+
+.custom-checkbox-box {
+  display: flex;
+  align-items: center;
+}
+
+.custom-checkbox-box.left {
+  flex-direction: row-reverse;
+}
+
+.custom-checkbox-box.right {
+  flex-direction: row;
+}
+
+.custom-checkbox {
+  margin-left: 10rpx;
+}
+
+.content {
+  font-size: 24rpx;
+}

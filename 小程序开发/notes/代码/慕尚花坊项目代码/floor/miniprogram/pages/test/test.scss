@@ -1,0 +1,22 @@
+/* pages/test/test.wxss */
+
+.box {
+  display: flex;
+  height: 200rpx;
+  justify-content: center;
+  align-items: center;
+}
+
+.btn {
+  background-color: transparent;
+}
+
+.btn::after {
+  border: none;
+}
+
+.avatar {
+  width: 200rpx;
+  height: 200rpx;
+  border-radius: 50%;
+}

@@ -1,0 +1,6 @@
+<!--components/custom02/custom02.wxml-->
+
+<view class="son2">
+  <text>子组件 b</text>
+  <view>{{ name }}</view>
+</view>

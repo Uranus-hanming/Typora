@@ -1,0 +1,4 @@
+
+<view>{{ name }}</view>
+
+<button type="warn" plain bindtap="updateName">更新 name</button>

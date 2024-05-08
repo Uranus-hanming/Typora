@@ -1,0 +1,5 @@
+/* pages/cate/cate.wxss */
+
+button {
+  margin-top: 34rpx;
+}

@@ -1,0 +1,24 @@
+<!--pages/index/index.wxml-->
+<!-- <text>pages/index/index.wxml</text> -->
+
+<!-- 坑： -->
+<!-- 在使用 van-image 图片组件时，如果需要渲染本地的图片，不能使用 ../ -->
+<!-- 需要相对于小程序源码的目录来查找图片才可以 -->
+<van-image
+  width="100"
+  height="100"
+  round
+  use-loading-slot
+  use-error-slot
+  custom-class="custom-class"
+  src="/assets/Jerry.png"
+  bind:click="imageHandler"
+>
+  <!-- slot: loading -->
+  <van-loading slot="loading" type="spinner" size="20" vertical />
+
+  <!-- slot: error -->
+  <text slot="error">加载失败</text>
+</van-image>
+
+<!-- <image src="../../assets/Jerry.png" mode=""/> -->

@@ -1,0 +1,28 @@
+
+
+<!-- wx:if 属性组 -->
+<!-- wx:if wx:elif wx:else -->
+<!-- 只有对应的条件成立，属性所在的组件才会进行展示 -->
+<!-- <view wx:if="{{ num === 1 }}">num 等于 {{ num }}</view>
+<view wx:elif="{{ num === 2 }}">num 等于 {{ num }}</view>
+<view wx:else>num 大于 2， 目前 num 等于 {{ num }}</view> -->
+
+<!-- wx:elif wx:else 不能单独使用，在使用的时候，必须结合 wx:if 来使用 -->
+<!-- <view wx:if="{{ num === 1 }}">num 等于 {{ num }}</view> -->
+<!-- <view wx:elif="{{ num === 2 }}">num 等于 {{ num }}</view> -->
+<!-- <view wx:else>num 大于 2， 目前 num 等于 {{ num }}</view> -->
+
+<!-- 使用了 wx:if 属性组的组件不能被打断，组件必须连贯才可以 -->
+<view wx:if="{{ num === 1 }}">num 等于 {{ num }}</view>
+<view wx:elif="{{ num === 2 }}">num 等于 {{ num }}</view>
+<view wx:else>num 大于 2， 目前 num 等于 {{ num }}</view>
+
+<!-- hidden 属性 -->
+<!-- hidden 属性 属性值 如果是 true，就会隐藏结构，如果是 false，才会展示结构-->
+
+<view hidden="{{ !isFlag }}">如果 isFlag 是 true，展示结构，否则隐藏结构</view>
+
+<!-- wx:if 控制结构的展示和隐藏，是通过新增和移除结构来实现的 -->
+<!-- hidden 属性控制结构的展示和隐藏，是通过 css 的 display 属性来实现 -->
+
+<button type="warn" bindtap="updateNum">更新 num</button>

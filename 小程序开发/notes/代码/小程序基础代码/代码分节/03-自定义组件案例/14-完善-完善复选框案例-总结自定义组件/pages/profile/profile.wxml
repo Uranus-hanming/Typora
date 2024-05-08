@@ -1,0 +1,16 @@
+<!-- pages/profile/profile.wxml -->
+<!-- <text>pages/profile/profile.wxml</text> -->
+
+<!-- <custom06 wx:if="{{ num === 1 }}" /> -->
+
+<!-- <button type="warn" bindtap="handler">销毁自定义组件</button> -->
+
+<!-- <navigator url="/pages/detail/detail?id=10&title=测试">跳转到详情页面</navigator> -->
+
+<custom08 />
+
+<view class="line"></view>
+
+<!-- 属性是在 externalClasses 里面定义的元素 -->
+<!-- 属性值必须是一个类名 -->
+<custom09 extend-class="my-class" />

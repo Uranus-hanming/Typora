@@ -1,0 +1,6 @@
+/* pages/index/index.wxss */
+
+page {
+  padding: 50rpx;
+  box-sizing: border-box;
+}

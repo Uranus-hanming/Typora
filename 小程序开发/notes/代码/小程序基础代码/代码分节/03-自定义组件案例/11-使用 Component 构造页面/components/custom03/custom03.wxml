@@ -1,0 +1,3 @@
+<!--components/custom03/custom03.wxml-->
+
+<text class="label">演示组件样式隔离</text>

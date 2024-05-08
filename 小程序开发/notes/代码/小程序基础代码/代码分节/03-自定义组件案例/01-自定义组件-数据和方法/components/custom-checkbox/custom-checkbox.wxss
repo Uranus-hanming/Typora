@@ -1,0 +1,5 @@
+/* components/custom-checkbox/custom-checkbox.wxss */
+
+.custom-checkbox-container {
+  display: inline-block;
+}

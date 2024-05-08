@@ -1,0 +1,5 @@
+/* pages/index/index.wxss */
+
+.custom-class {
+  border: 10rpx solid lightseagreen !important;
+}

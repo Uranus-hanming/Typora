@@ -1,0 +1,19 @@
+
+<scroll-view
+  scroll-y
+  class="scroll-y"
+
+  lower-threshold="100"
+  bindscrolltolower="getMore"
+  enable-back-to-top
+
+  refresher-enabled
+  refresher-default-style="black"
+  refresher-background="#f7f7f8"
+  bindrefresherrefresh="refreshHandler"
+  refresher-triggered="{{isTriggered}}"
+>
+  
+  <view wx:for="{{ numList }}" wx:key="*this">{{ item }}</view>
+
+</scroll-view>

@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "pubsub-js": "^1.9.4"
+  }
+}

@@ -1,0 +1,64 @@
+/* components/custom-checkbox/custom-checkbox.wxss */
+
+.custom-checkbox-container {
+  display: inline-block;
+}
+
+.custom-checkbox-box .custom-label {
+  display: flex;
+  align-items: center;
+}
+
+.custom-checkbox-box.left {
+  flex-direction: row-reverse;
+}
+
+.custom-checkbox-box.right {
+  flex-direction: row;
+}
+
+.custom-checkbox {
+  margin-left: 10rpx;
+}
+
+.content {
+  font-size: 24rpx;
+}
+
+/* 复选框组件是公共组件 */
+/* 以后需要再多个页面或者需要再多个项目中进行使用 */
+/* 所以呢，需要先给复选框组件准备、设置一些默认样式 */
+/* 如果在其他页面或者其他项目中使用的时候，发现样式不符合产品需求 */
+/* 可以进行修改、对默认的样式进行修改 */
+
+/* 1. 需要给复选框设置默认样式 */
+/* 需要先找到小程序给复选框提供的类名，通过小程序给提供的类名修改才可以 */
+/* 需要先打开小程序开发文档，找到复选框文档，审查元素，进行查找 */
+
+/* 在自定义组件中，不能直接修改复选框样式 */
+/* 如果需要进行修改，需要设置 styleIsolation 才可以 */
+/* shared：修改其他页面的样式、组件使用者的样式、以及其他使用了 share 以及 apply-share 的组件 */
+/* 这时候，不是想要的结果 */
+/* 需求是：只想影响当前组件，可以添加命名空间 */
+
+/* 复选框没有选中时默认的样式 */
+.custom-checkbox .wx-checkbox-input {
+  width: 24rpx !important;
+  height: 24rpx !important;
+  border-radius: 50% !important;
+  border: 1px solid #fda007 !important;
+  margin-top: -6rpx;
+}
+
+/* 复选框选中时默认的样式 */
+.custom-checkbox .wx-checkbox-input-checked {
+  background-color: #fda007 !important;
+}
+
+/* 复选框选中时 √ 样式 */
+.custom-checkbox .wx-checkbox-input.wx-checkbox-input-checked:before {
+  font-size: 22rpx;
+  color: #fff;
+}
+
+/* 2. 组件使用者也能够修改默认的样式 */

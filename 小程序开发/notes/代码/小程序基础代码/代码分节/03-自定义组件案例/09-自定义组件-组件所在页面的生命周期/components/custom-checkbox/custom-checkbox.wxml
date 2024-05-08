@@ -1,0 +1,18 @@
+<!--components/custom-checkbox/custom-checkbox.wxml-->
+<!-- <text>我是自定义组件</text> -->
+
+<view class="custom-checkbox-container">
+  <view class="custom-checkbox-box {{ position === 'right' ? 'right' : 'left' }}">
+    <checkbox class="custom-checkbox" checked="{{ isChecked }}" bindtap="updateChecked" />
+
+    <view class="content">
+      <!-- lable 和 子节点内容都进行了展示 -->
+      <!-- 要么展示 lable 要么展示 子节点内容 -->
+      <!-- 如果用户传递了 lable 属性，就展示 lable -->
+      <!-- 如果用户没有传递 lable 属性，就展示 子节点内容 -->
+      <text wx:if="{{ label !== '' }}">{{ label }}</text>
+
+      <slot wx:else />
+    </view>
+  </view>
+</view>

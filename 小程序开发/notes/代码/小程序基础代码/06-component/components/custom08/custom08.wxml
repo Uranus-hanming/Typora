@@ -1,0 +1,8 @@
+<!--components/custom08/custom08.wxml-->
+<!-- <text>components/custom08/custom08.wxml</text> -->
+
+<view>{{ label }}</view>
+<view>{{ name }}</view>
+<view>{{ obj.name }} - {{ obj.age }}</view>
+
+<button type="primary" plain bindtap="updateName">更新数据</button>

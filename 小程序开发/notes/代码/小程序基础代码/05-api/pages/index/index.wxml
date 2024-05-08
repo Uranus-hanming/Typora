@@ -1,0 +1,6 @@
+<!-- pages/index/index.wxml-->
+<!-- <text>pages/index/index.wxml</text> -->
+
+<!-- <button type="warn" bindtap="getData">获取数据</button> -->
+
+<button type="primary" bindtap="delHandler">删除商品</button>

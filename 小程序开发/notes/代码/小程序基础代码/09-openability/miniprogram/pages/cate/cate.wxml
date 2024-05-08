@@ -1,0 +1,4 @@
+<!--pages/cate/cate.wxml-->
+<!-- <text>pages/cate/cate.wxml</text> -->
+
+<button open-type="share">转发</button>

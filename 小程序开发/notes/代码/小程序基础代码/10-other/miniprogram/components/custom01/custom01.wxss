@@ -1,0 +1,8 @@
+/* components/custom01/custom01.wxss */
+
+.son1 {
+  height: 200rpx;
+  background-color: lightseagreen;
+  padding: 10rpx;
+  box-sizing: border-box;
+}

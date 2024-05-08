@@ -1,0 +1,12 @@
+<!-- pages/index/index.wxml-->
+<!-- <text>pages/index/index.wxml</text> -->
+
+<!-- <custom-swiper /> -->
+
+<!-- label 文本显示的内容 -->
+<!-- position 控制文本显示的位置 -->
+<custom-checkbox label="我已阅读并同意 用户协议 和 隐私协议" position="right" />
+
+<view class="line"></view>
+
+<custom-checkbox label="匿名提交" position="left" />

@@ -1,0 +1,8 @@
+{
+  "description": "项目私有配置文件。此文件中的内容将覆盖 project.config.json 中的相同字段。项目的改动优先同步到此文件中。详见文档：https://developers.weixin.qq.com/miniprogram/dev/devtools/projectconfig.html",
+  "projectname": "01-mpbase-%E5%B0%8F%E7%A8%8B%E5%BA%8F%E6%A0%B7%E5%BC%8F%E4%B9%8B%E5%89%8D%E4%BB%A3%E7%A0%81",
+  "setting": {
+    "compileHotReLoad": true,
+    "urlCheck": true
+  }
+}

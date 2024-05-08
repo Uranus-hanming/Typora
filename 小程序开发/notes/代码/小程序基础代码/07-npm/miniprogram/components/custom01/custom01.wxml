@@ -1,0 +1,4 @@
+<!--components/custom01/custom01.wxml-->
+<!-- <text>components/custom01/custom01.wxml</text> -->
+
+<van-button type="primary">主要按钮</van-button>

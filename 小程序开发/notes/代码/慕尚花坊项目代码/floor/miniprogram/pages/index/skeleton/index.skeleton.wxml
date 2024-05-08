@@ -1,0 +1,180 @@
+<!--
+此文件为开发者工具生成，生成时间: 2023/12/11下午4:52:45
+使用方法：
+在 C:\Users\15778\Desktop\小程序项目\floor\miniprogram\pages\index\index.wxml 引入模板
+
+```
+<import src="index.skeleton.wxml"/>
+<template is="skeleton" wx:if="{{loading}}" />
+```
+
+在 C:\Users\15778\Desktop\小程序项目\floor\miniprogram\pages\index\index.wxss 中引入样式
+```
+@import "./index.skeleton.wxss";
+```
+
+更多详细信息可以参考文档：https://developers.weixin.qq.com/miniprogram/dev/devtools/skeleton.html
+-->
+<template name="skeleton">
+  <view class="sk-container">
+    <view class="index-container">
+      <view class="window-bgc"></view>
+      <view class="container">
+        <view is="pages/index/banner/banner">
+          <view class="banner--swiper-box">
+            <swiper
+              autoplay="false"
+              class="banner--swiper"
+              duration="1000"
+              indicator-active-color="#FF734C"
+              indicator-color="rgba(0, 0, 0, .3)"
+              interval="2000"
+              current="0"
+            >
+              <swiper-item class="banner--swiper-item swiper-item-1">
+                <navigator class="banner--navigator">
+                  <image class="banner--img sk-image"></image>
+                </navigator>
+              </swiper-item>
+              <swiper-item class="banner--swiper-item swiper-item-2">
+                <navigator class="banner--navigator">
+                  <image class="banner--img sk-image"></image>
+                </navigator>
+              </swiper-item>
+            </swiper>
+            <view class="banner--indicator">
+              <text class="banner--rectangle"></text>
+              <text class="banner--active banner--rectangle"></text>
+              <text class="banner--rectangle"></text>
+            </view>
+          </view>
+        </view>
+        <view is="pages/index/entrance/entrance">
+          <view class="entrance--nav-list">
+            <view class="entrance--nav-item">
+              <navigator class="entrance--navigator-nav">
+                <image class="entrance--nav-img sk-image"></image>
+                <text
+                  class="entrance--nav-text sk-transparent sk-text-14-2857-707 sk-text"
+                  >爱礼精选</text
+                >
+              </navigator>
+            </view>
+            <view class="entrance--nav-item">
+              <navigator class="entrance--navigator-nav">
+                <image class="entrance--nav-img sk-image"></image>
+                <text
+                  class="entrance--nav-text sk-transparent sk-text-14-2857-101 sk-text"
+                  >鲜花玫瑰</text
+                >
+              </navigator>
+            </view>
+            <view class="entrance--nav-item">
+              <navigator class="entrance--navigator-nav">
+                <image class="entrance--nav-img sk-image"></image>
+                <text
+                  class="entrance--nav-text sk-transparent sk-text-14-2857-506 sk-text"
+                  >永生玫瑰</text
+                >
+              </navigator>
+            </view>
+            <view class="entrance--nav-item">
+              <navigator class="entrance--navigator-nav">
+                <image class="entrance--nav-img sk-image"></image>
+                <text
+                  class="entrance--nav-text sk-transparent sk-text-14-2857-477 sk-text"
+                  >玫瑰珠宝</text
+                >
+              </navigator>
+            </view>
+            <view class="entrance--nav-item">
+              <navigator class="entrance--navigator-nav">
+                <image class="entrance--nav-img sk-image"></image>
+                <text
+                  class="entrance--nav-text sk-transparent sk-text-14-2857-191 sk-text"
+                  >香水体护</text
+                >
+              </navigator>
+            </view>
+            <view class="entrance--nav-item entrance--small">
+              <navigator class="entrance--navigator-nav">
+                <image class="entrance--nav-img sk-image"></image>
+                <text
+                  class="entrance--nav-text sk-transparent sk-text-14-2857-738 sk-text"
+                  >玫瑰家居</text
+                >
+              </navigator>
+            </view>
+            <view class="entrance--nav-item entrance--small">
+              <navigator class="entrance--navigator-nav">
+                <image class="entrance--nav-img sk-image"></image>
+                <text
+                  class="entrance--nav-text sk-transparent sk-text-14-2857-650 sk-text"
+                  >开业花礼</text
+                >
+              </navigator>
+            </view>
+            <view class="entrance--nav-item entrance--small">
+              <navigator class="entrance--navigator-nav">
+                <image class="entrance--nav-img sk-image"></image>
+                <text
+                  class="entrance--nav-text sk-transparent sk-text-14-2857-590 sk-text"
+                  >生日祝福</text
+                >
+              </navigator>
+            </view>
+            <view class="entrance--nav-item entrance--small">
+              <navigator class="entrance--navigator-nav">
+                <image class="entrance--nav-img sk-image"></image>
+                <text
+                  class="entrance--nav-text sk-transparent sk-text-14-2857-947 sk-text"
+                  >一周一花</text
+                >
+              </navigator>
+            </view>
+            <view class="entrance--nav-item entrance--small">
+              <navigator class="entrance--navigator-nav">
+                <image class="entrance--nav-img sk-image"></image>
+                <text
+                  class="entrance--nav-text sk-transparent sk-text-14-2857-664 sk-text"
+                  >网红绿植</text
+                >
+              </navigator>
+            </view>
+          </view>
+        </view>
+        <view class="adver">
+          <view class="adver-left">
+            <navigator>
+              <image
+                mode="widthFix"
+                style="height: 218.803px"
+                class="sk-image"
+              ></image>
+            </navigator>
+          </view>
+          <view class="adver-right">
+            <view>
+              <navigator>
+                <image
+                  mode="widthFix"
+                  style="height: 104.746px"
+                  class="sk-image"
+                ></image>
+              </navigator>
+            </view>
+            <view>
+              <navigator>
+                <image
+                  mode="widthFix"
+                  style="height: 104.746px"
+                  class="sk-image"
+                ></image>
+              </navigator>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</template>

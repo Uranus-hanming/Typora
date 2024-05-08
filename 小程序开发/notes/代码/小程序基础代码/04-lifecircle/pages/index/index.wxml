@@ -1,0 +1,8 @@
+<!-- pages/index/index.wxml-->
+<!-- <text>pages/index/index.wxml</text> -->
+
+<!-- redirect：销毁当前页面，跳转到下一个页面 -->
+<navigator url="/pages/list/list" open-type="redirect">跳转到列表页面-redirect</navigator>
+
+<!-- navigate：保留当前页面，跳转到下一个页面 -->
+<navigator url="/pages/list/list" open-type="navigate">跳转到列表页面-navigate</navigator>

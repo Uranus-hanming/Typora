@@ -1,0 +1,6 @@
+<!--components/custom01/custom01.wxml-->
+
+<view class="son1">
+  <text>子组件 a</text>
+  <button bindtap="sendData">传递数据给兄弟</button>
+</view>

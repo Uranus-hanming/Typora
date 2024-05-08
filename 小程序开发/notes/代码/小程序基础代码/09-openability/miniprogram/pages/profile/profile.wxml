@@ -1,0 +1,4 @@
+<!--pages/profile/profile.wxml-->
+<!-- <text>pages/profile/profile.wxml</text> -->
+
+<button type="warn" plain open-type="contact">联系客服</button>

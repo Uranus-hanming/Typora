@@ -1,0 +1,20 @@
+<!--pages/index/index.wxml-->
+<!-- <text>pages/index/index.wxml</text> -->
+
+<view>
+  <button class="btn" open-type="chooseAvatar" bindchooseavatar="chooseavatar">
+    <image class="avatar" src="{{ avatarUrl }}" mode=""/>
+  </button>
+</view>
+
+<!-- 需要使用 form 组件包裹住 input 以及 button 组件 -->
+<form bindsubmit="onSubmit">
+
+  <!-- input 输入框组件的 type 属性设置为 nickname，用户点击输入框，键盘上方才会显示微信昵称 -->
+  <!-- 如果添加了 name 属性，form 组件就会自动收集带有 name 属性的表单元素的值 -->
+  <input type="nickname" name="nickname" placeholder="请输入昵称" />
+
+  <!-- 如果将 form-type="submit" ，就将按钮变为提交按钮 -->
+  <!-- 在点击提交按钮的时候，会触发 表单的 bindsubmit 提交事件 -->
+  <button type="primary" plain form-type="submit">点击获取昵称</button>
+</form>

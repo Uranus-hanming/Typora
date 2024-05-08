@@ -1,0 +1,7 @@
+
+<view bindtap="parentHandler" data-parent-id="1" data-parentName="tom">
+  <!-- 如果需要进行事件传参，需要再组件上通过 data- 的方式传递数据 -->
+  <!-- <button bindtap="btnHandler" data-id="1" data-name="tom">按钮</button> -->
+
+  <button data-id="1" data-name="tom">按钮</button>
+</view>

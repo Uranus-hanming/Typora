@@ -1,0 +1,50 @@
+<!-- 引入骨架屏 -->
+<import src="./skeleton/index.skeleton.wxml" />
+<!-- 使用骨架屏 -->
+<template is="skeleton" wx:if="{{ loading }}" />
+
+<view wx:else class="index-container">
+  <!--首页背景图-->
+  <view class="window-bgc"></view>
+
+  <!-- 页面主体区域 -->
+  <view class="container">
+    <!-- 轮播图区域 -->
+    <banner bannerList="{{ bannerList }}" />
+
+    <!-- 导航分类 -->
+    <entrance cateList="{{ categoryList }}" />
+
+    <!-- 广告区域 -->
+    <view class="adver">
+      <view class="adver-left">
+        <navigator
+          url="/modules/goodModule/pages/goods/list/list?category2Id={{ activeList[0].category2Id }}"
+        >
+          <image src="{{ activeList[0].imageUrl }}" mode="widthFix" />
+        </navigator>
+      </view>
+
+      <view class="adver-right">
+        <view>
+          <navigator
+            url="/modules/goodModule/pages/goods/list/list?category2Id={{ activeList[1].category2Id }}"
+          >
+            <image src="{{ activeList[1].imageUrl }}" mode="widthFix" />
+          </navigator>
+        </view>
+        <view>
+          <navigator
+            url="/modules/goodModule/pages/goods/list/list?category2Id={{ activeList[2].category2Id }}"
+          >
+            <image src="{{ activeList[2].imageUrl }}" mode="widthFix" />
+          </navigator>
+        </view>
+      </view>
+    </view>
+
+    <!-- 商品列表 -->
+    <goods-list title="猜你喜欢" list="{{ guessList }}"></goods-list>
+    <goods-list title="人气推荐" list="{{ hotList }}"></goods-list>
+  </view>
+</view>

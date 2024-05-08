@@ -1,0 +1,10 @@
+<!-- pages/index/index.wxml-->
+<!-- <text>pages/index/index.wxml</text> -->
+
+<!-- <custom-swiper /> -->
+
+<custom-checkbox />
+
+<view class="line"></view>
+
+<custom-checkbox />

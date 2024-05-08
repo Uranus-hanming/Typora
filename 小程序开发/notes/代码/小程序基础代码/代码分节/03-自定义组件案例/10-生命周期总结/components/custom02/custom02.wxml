@@ -1,0 +1,5 @@
+<!--components/custom02/custom02.wxml-->
+
+<text id="content" class="content son">
+  <text class="label test">给自定义组件设置样式</text>
+</text>

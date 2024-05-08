@@ -1,0 +1,8 @@
+/* components/custom01/custom01.wxss */
+
+/* 注意事项：在自定义组件中如果需要 Vant Weapp 组件的样式，需要解除样式隔离，shared */
+/* .van-button--primary {
+  font-size: 28rpx !important;
+  background-color: lightseagreen !important;
+  border: 1px solid lightseagreen !important;
+} */

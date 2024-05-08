@@ -1,0 +1,9 @@
+/* components/custom02/custom02.wxss */
+
+.son2 {
+  height: 200rpx;
+  background-color: lightsalmon;
+  margin-top: 20rpx;
+  padding: 10rpx;
+  box-sizing: border-box;
+}

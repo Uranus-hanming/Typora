@@ -1,0 +1,75 @@
+{
+  // 保存文件时是否自动格式化
+  "editor.formatOnSave": true,
+
+  // ---------------- 以下是 [ prettier ] 插件配置 ----------------
+
+  // 指定 javascript、wxss、scss、less、json、jsonc 等类型文件使用 prettier 进行格式化
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+
+  "[wxss]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+
+  "[scss]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+
+  "[less]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+
+  // Prettier 的一个配置项，用于指定哪些文件类型需要使用 Prettier 进行格式化
+  "prettier.documentSelectors": ["**/*.wxml", "**/*.wxss", "**/*.wxs"],
+
+  // ---------------- 以下是 [ WXML - Language Service ] 插件配置 ----------------
+
+  // wxml 文件使用 prettier 进行格式化
+  "[wxml]": {
+    // "qiu8310.minapp-vscode" 是 WXML - Language Service 插件提供的配置项
+    // 此插件主要是针对小程序的 wxml 模板语言，可以自动补全所有的组件、组件属性、组件属性值等等
+
+    // 如果是 VsCode 需要开启这个配置
+    // "editor.defaultFormatter": "qiu8310.minapp-vscode"
+
+    // 如果是微信小程序，需要开启这个配置，通过 esbenp.prettier-vscode 对代码进行格式化
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+
+  // 创建组件时使用的 css 后缀
+  "minapp-vscode.cssExtname": "scss", // 默认 wxss，支持 styl sass scss less css
+
+  // 指定 WXML 格式化工具
+  "minapp-vscode.wxmlFormatter": "prettier",
+  // 配置 prettier 代码规范
+  "minapp-vscode.prettier": {
+    "useTabs": false,
+    "tabWidth": 2,
+    "printWidth": 80
+  },
+
+  // ---------------- 以下是 [ 微信小程序助手-Y ] 插件配置 ----------------
+
+  // 新增、删除小程序页面时，是否自动同步 app.json pages 路径配置，默认为 false
+  "wechat-miniapp.sync.delete": true,
+  // 设置小程序页面 wxss 样式文件的扩展名
+  "wechat-miniapp.ext.style": "scss",
+
+  // ---------------- 其他配置项 ----------------
+
+  // 配置语言的文件关联，运行 .json 文件时写注释
+  // 但在 app.json 和 page.json 中无法使用
+  "files.associations": {
+    "*.json": "jsonc"
+  }
+}

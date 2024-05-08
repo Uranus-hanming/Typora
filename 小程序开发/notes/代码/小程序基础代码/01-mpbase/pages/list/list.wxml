@@ -1,0 +1,6 @@
+<!--pages/list/list.wxml-->
+<!-- <text>pages/list/list.wxml</text> -->
+
+<!-- navigateBack：返回上一页或者返回前几页，默认只能返回上一页 -->
+<!-- delta：返回的层级，默认是 1，如果想返回几级，就写几 -->
+<navigator open-type="navigateBack" delta="1">返回上一页</navigator>

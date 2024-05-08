@@ -1,0 +1,4 @@
+<!-- pages/list/list.wxml -->
+<!-- <text>pages/list/list.wxml</text> -->
+
+<button plain type="warn" bindtap="navigateBack">navigateBack</button>

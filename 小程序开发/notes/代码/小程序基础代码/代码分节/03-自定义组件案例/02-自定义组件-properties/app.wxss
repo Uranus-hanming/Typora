@@ -1,0 +1,5 @@
+
+.line {
+  border-top: 5rpx solid lightseagreen;
+  margin: 100rpx 0;
+}

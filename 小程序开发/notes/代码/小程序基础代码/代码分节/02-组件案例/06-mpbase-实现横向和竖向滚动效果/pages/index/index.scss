@@ -1,0 +1,121 @@
+
+page {
+  height: 100vh;
+  background-color: #efefef !important;
+  padding: 16rpx;
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+
+  > view {
+    &:nth-child(n + 2) {
+      margin-top: 16rpx;
+    }
+  }
+}
+
+// 轮播图区域样式
+.swiper {
+  border-radius: 10rpx;
+  overflow: hidden;
+
+  swiper {
+    height: 360rpx;
+    // background-color: skyblue;
+
+    swiper-item {
+
+      image {
+        width: 100%;
+        height: 100%;
+        border-radius: 10rpx;
+      }
+
+      // & 在 Sass 中代表的是父选择器，引用的意思
+      // swiper-item:first-child
+      // &:first-child {
+      //   background-color: lightsalmon;
+      // }
+
+      // &:last-child {
+      //   background-color: lightseagreen;
+      // }
+    }
+  }
+}
+
+// 公司信息区域
+.info {
+  display: flex;
+  justify-content: space-between;
+  background-color: #fff;
+  padding: 20rpx 16rpx;
+  border-radius: 10rpx;
+  font-size: 24rpx;
+}
+
+// 商品导航区域
+.good-nav {
+  display: flex;
+  justify-content: space-between;
+  background-color: #fff;
+  padding: 20rpx 16rpx;
+  border-radius: 10rpx;
+
+  view {
+    navigator {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    image {
+      width: 80rpx;
+      height: 80rpx;
+    }
+
+    text {
+      font-size: 24rpx;
+      margin-top: 12rpx;
+    }
+  }
+}
+
+.scroll-x {
+  width: 100%;
+  white-space: nowrap;
+  background-color: skyblue;
+
+  view {
+    display: inline-block;
+    width: 300rpx;
+    height: 80rpx;
+
+    &:last-child {
+      background-color: lightcoral;
+    }
+
+    &:first-child {
+      background-color: lightseagreen;
+    }
+  }
+}
+
+.scroll-y {
+  height: 400rpx;
+  background-color: skyblue;
+  margin-top: 10rpx;
+
+  view {
+    height: 400rpx;
+
+    &:last-child {
+      background-color: lightcoral;
+    }
+
+    &:first-child {
+      background-color: lightseagreen;
+    }
+  }
+}

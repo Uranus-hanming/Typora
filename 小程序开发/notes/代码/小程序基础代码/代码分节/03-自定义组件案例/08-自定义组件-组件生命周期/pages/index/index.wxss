@@ -1,0 +1,15 @@
+/* pages/index/index.wxss */
+
+page {
+  padding: 50rpx;
+  box-sizing: border-box;
+}
+
+/* 组件使用者修改复选框的样式 */
+.custom .custom-checkbox .wx-checkbox-input {
+  border: 1px solid lightseagreen !important;
+}
+
+.custom .custom-checkbox .wx-checkbox-input-checked {
+  background-color: lightseagreen !important;
+}

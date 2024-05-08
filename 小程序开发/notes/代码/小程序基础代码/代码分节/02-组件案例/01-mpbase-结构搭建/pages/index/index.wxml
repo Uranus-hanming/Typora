@@ -1,0 +1,14 @@
+
+<!-- view 小程序提供的容器组件，可以直接当成 div 使用即可 -->
+
+<!-- 轮播图区域 -->
+<view class="swiper"></view>
+
+<!-- 公司信息 -->
+<view class="info"></view>
+
+<!-- 商品导航 -->
+<view class="good-nav"></view>
+
+<!-- 推荐商品 -->
+<view class="good-hot"></view>

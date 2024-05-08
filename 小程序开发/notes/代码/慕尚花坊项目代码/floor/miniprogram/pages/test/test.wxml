@@ -1,0 +1,52 @@
+<!-- pages/test/test.wxml -->
+<!-- <text>pages/test/test.wxml</text> -->
+
+<!-- <view class="box">
+  <button type="warn" plain size="mini" bindtap="handler">测试发送请求</button>
+</view> -->
+
+<!-- <view class="box">
+  <button type="primary" plain size="mini" bindtap="handler1">测试发送请求</button>
+</view> -->
+
+<!-- <view class="box">
+  <button type="warn" plain size="mini" bindtap="allHandler">
+    测试并发请求
+  </button>
+</view> -->
+
+<!-- <view>
+  <button class="btn" open-type="chooseAvatar" bindchooseavatar="chooseavatar">
+    <image class="avatar" src="{{ avatarUrl }}" mode="" />
+  </button>
+</view> -->
+
+<!-- 以下是授权流程代码 -->
+
+<!-- <view class="box">
+  <button type="primary" plain size="mini" bindtap="onLocation1">
+    拒绝授权后的处理方案-演示问题
+  </button>
+</view> -->
+
+<!-- <view class="box">
+  <button type="primary" plain size="mini" bindtap="onLocation2">
+    拒绝授权后的处理方案-获取授权状态
+  </button>
+</view> -->
+
+<!-- <view class="box">
+  <button type="warn" plain size="mini" bindtap="onLocation">
+    拒绝授权后的处理方案-整体的逻辑
+  </button>
+</view> -->
+
+<!-- 如果给按钮添加 open-type 属性，属性设置为 openSetting，就会打开授权页面 -->
+<!-- 就会打开微信客户端小程序授权页面 -->
+<!-- <view class="box">
+  <button type="primary" open-type="openSetting">打开授权页面</button>
+</view> -->
+
+<view class="box">
+  <button type="warn" plain size="mini" bindtap="onValidator">验证数据</button>
+</view>

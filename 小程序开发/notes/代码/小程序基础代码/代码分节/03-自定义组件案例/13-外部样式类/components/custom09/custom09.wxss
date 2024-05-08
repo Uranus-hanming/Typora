@@ -1,0 +1,5 @@
+/* components/custom09/custom09.wxss */
+
+.box {
+  color: lightseagreen;
+}

@@ -1,0 +1,12 @@
+<!--pages/market/market.wxml-->
+<!-- <text>pages/market/market.wxml</text> -->
+
+<custom07 />
+
+<view class="line"></view>
+
+<navigator url="/pages/list/list" open-type="navigate">跳转到 List - navigate </navigator>
+
+<view class="line"></view>
+
+<navigator url="/pages/list/list" open-type="redirect">跳转到 List - redirect</navigator>

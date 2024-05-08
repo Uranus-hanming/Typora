@@ -1,0 +1,7 @@
+<!--components/custom09/custom09.wxml-->
+<!-- <text>components/custom09/custom09.wxml</text> -->
+
+<!-- 在同一个节点上，如果存在外部样式类 和 普通的样式类 -->
+<!-- 两个类的优先级是未定义的 -->
+<!-- 建议：在使用外部样式类的时，样式需要通过 !important 添加权重 -->
+<view class="extend-class box">通过外部样式类修改组件的样式</view>

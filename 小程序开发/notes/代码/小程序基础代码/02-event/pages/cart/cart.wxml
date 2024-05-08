@@ -1,0 +1,7 @@
+
+<view bindtap="parentHandler" mark:parentid="1" mark:parentname="tom">
+  <!-- 如果需要使用 mark 进行事件传参，需要使用 mark:自定义属性的方式进行参数传递 -->
+  <!-- <button bindtap="btnHandler" mark:id="1" mark:name="tom">按钮</button> -->
+
+  <button mark:id="1" mark:name="tom">按钮</button>
+</view>

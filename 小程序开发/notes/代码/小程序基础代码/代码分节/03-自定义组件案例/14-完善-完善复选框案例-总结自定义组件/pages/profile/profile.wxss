@@ -1,0 +1,5 @@
+/* pages/index/index.wxss */
+
+.my-class {
+  color: lightsalmon !important;
+}

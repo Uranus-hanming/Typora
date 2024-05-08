@@ -1,0 +1,16 @@
+<!--pages/cate/cate.wxml-->
+<!-- <text>pages/cate/cate.wxml</text> -->
+
+<swiper class="custom-swiper" indicator-dots autoplay interval="2000">
+  <swiper-item>
+    <image src="../../assets/banner/banner-1.png" mode=""/>
+  </swiper-item>
+
+  <swiper-item>
+    <image src="../../assets/banner/banner-2.png" mode=""/>
+  </swiper-item>
+
+  <swiper-item>
+    <image src="../../assets/banner/banner-3.png" mode=""/>
+  </swiper-item>
+</swiper>

@@ -1,0 +1,5 @@
+<!--pages/index/index.wxml-->
+<!-- <text>pages/index/index.wxml</text> -->
+
+<!-- 如果需要跳转到分包页面，需要在路径之前添加上分包的根目录路径 root 路径才可以 -->
+<navigator url="/modules/goodModule/pages/list/list">跳转到商品列表页面</navigator>
