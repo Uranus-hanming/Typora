@@ -748,9 +748,9 @@ class xxxxSerializer(serializers.ModelSerializer):
       device_id = serializers.CharField(required=False)
       
       class Meta:
-      model = xxx
-      fields = "__all__"
-      depth = 1
+          model = xxx
+          fields = "__all__"
+          depth = 1
       
   # 用户就可以在get请求时获取到device关联的详细信息，也能在发送post/put请求时，给device_id传递id值对数据进行更改。
   ```
@@ -2025,7 +2025,7 @@ class DepartSerializer(serializers.ModelSerializer):
       def get_v1(self, obj):
           return {"id": obj.gender, "text": obj.get_gender_display()}
       
-  # 针对choices，方式三：将方式一和方式而结合
+  # 针对choices，方式三：将方式一和方式二而结合
   # SerializerMethodField到底是如何实现的执行钩子方法？
   class MyCharField(serializers.IntegerField):
       def __init__(self, method_name=None, **kwargs):
