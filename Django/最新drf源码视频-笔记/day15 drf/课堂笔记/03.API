@@ -1,0 +1,8 @@
+获取数据：
+	api/v1/user/         ->GET请求         -> 获取数据列表 models.UserInfo.objects.all() 
+	api/v1/user/         ->POST请求        -> 新增数据
+
+
+
+	api/v1/user/2/       ->GET请求           -> 获取数据    models.UserInfo.objects.filter(id=2).first()
+	api/v1/user/2/       ->PUT请求           -> 更新数据

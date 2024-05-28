@@ -1,0 +1,53 @@
+第一步：加载字段
+	
+	# 1.在类成员中删除
+	# 2.汇总到 BBSerializer._declared_fields = {"yy":对象}
+	class BBSerializer(serializers.Serializer):
+    	yy = serializers.CharField(source='name')
+    	name = 123
+
+    # 1.在类成员中删除
+    # 2.汇总到 BBSerializer._declared_fields = {"xx":对象，"yy":对象 }
+
+	class UserSerializer(serializers.ModelSerializer,BBSerializer):
+	    xx = serializers.CharField(source='name')
+
+	    class Meta:
+	        model = models.UserInfo
+	        fields = ["name", "age","xx"]
+
+
+第二步：序列化
+	queryset = models.UserInfo.objects.all()
+	ser = UserSerializer(instance=queryset, many=True)  # ListSerializer对象（UserSerializer对象）
+	db->queryset = [ {id:xxx,name:xx,age}, ]   -> 循环queryset中的每个对象，再调用UserSerializer对他进行实例化。
+
+
+	instance = models.UserInfo.objects.all().first()
+	ser = UserSerializer(instance=instance, many=False) # UserSerializer对象
+	db->instance = {id:xxx,name:xx,age}    => UserSerializer
+
+
+	=====> 对象   ->  UserSerializer   ->序列化、
+
+
+	序列化过程：
+		db_instance = models.UserInfo.objects.all().first()       instance.title    order   count  models.IntegerField(verbose_name="顺序")
+		ser = UserSerializer(instance=db_instance,many=False)              titte    order   count  serializers.CharField(source='name')
+
+		ser.data   # 触发
+
+		    - 内部寻找对应关系
+		    - 一一进行序列化
+
+
+
+
+
+
+
+
+
+
+
+

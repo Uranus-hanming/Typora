@@ -1,0 +1,119 @@
+drf-中篇
+
+1.版本组件
+2.解析器组件
+3.元类
+	- 基于类可以实例化对象。   类()
+	- type也可以创建类(默认）。
+		- 默认    type
+			class type:
+				def __init__(self):
+					在空值初识话数据
+
+				def __new__(self):
+					创建->创建类
+
+			Foo = type("Foo", (object,), {"v1": 123, "func": lambda self: 999})
+
+		- 自定义  继承type
+			class MyType(type):
+
+				def __new__(self):
+					super().__new__()
+	- 如何基于MyType创建类呢？
+		- 方式1：
+			class MyType(type):
+
+			    def __new__(cls, *args, **kwargs):
+			        xx = super().__new__(cls, *args, **kwargs)
+			        return xx
+
+
+			Foo = MyType("Foo", (object,), {"v1": 123, "func": lambda self: 999})
+
+		- 方式2：
+			class MyType(type):
+			    def __new__(cls, *args, **kwargs):
+			        print(1)
+			        xx = super().__new__(cls, *args, **kwargs)
+			        return xx
+
+
+			class Foo(object, metaclass=MyType):
+			    v1 = 123
+
+			    def func(self):
+			        pass
+    - 类中获取父类中指定了metaclass，全部都是有metaclass创建的类
+    - 扩展
+
+4.序列化器（*）
+	- 序列化，从数据库获取QuerySet或数据对象 -> JSON
+	- 序列化-源码流程
+
+	- 数据校验
+	- 数据校验-源码流程
+
+	4.1 序列化
+		- Serializer
+		- ModelSerializer
+		- choice&source + 时间
+		- 自定义
+		- 嵌套，针对：fk、m2m
+		- 继承
+		数据库中任何表结构关系，获取到对象or QuerySet时，就可以利用上述知识点转成JSON，再返回。
+
+	4.2 序列化-源码流程
+
+
+
+	4.3 数据校验，对用户请求数据格式校验 => Form+ModelForm很像
+
+
+5.任务
+	- 元类到底是咋回事？
+	- 序列化器
+		- 常见使用
+		- 源码流程：画图+分析
+	- 预习：
+		- 数据校验
+		- 数据校验+源码流程（可选）
+
+
+	- 案例：博客平台
+		- 登录&注册 => 提交数据 （ 数据校验）
+		- 博客列表  => QuerySet => 序列化 =>many=True
+		- 博客详细  => ORM对象   => 序列化 =>many=False
+		- 新建博客 
+		- 认证+版本
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

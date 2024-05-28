@@ -59,6 +59,7 @@
 11. 项目合并注意事项
 
     - 上传代码的时候记得要先拉一下，免得冲突了
+
     - 每次commit的时候执行一下 pre-commit run --all-files
 
     - bk_power\settings\overlays\front.py
@@ -253,7 +254,7 @@ class OperationInfoMixin(models.Model):
        > 级联删除模式：当关联表（父表）中的数据删除时，与其相对应的外键（子表）中的数据也删除。
        >
        > class Feedback(models.Model):
-       >     user = models.ForeignKey(User, on_delete=models.CASCADE， null=True, blank=Tru)
+       >  user = models.ForeignKey(User, on_delete=models.CASCADE， null=True, blank=Tru)
        >
        > 当删除父表（user）时，此时关联的子表（feedback）中相应关联用户user_id的数据就会被删除。
 
@@ -389,7 +390,7 @@ BookInfo.objects.filter(~Q(id=3))
 
 >  aggregate聚合操作的返回值是字典
 >
-> annotate进行聚合的原理是将QuerySet内的每个对象都进行注解，注解的信息直接存储为对象的一个新字段，因此其查询的返回值仍然是QuerySet。
+>  annotate进行聚合的原理是将QuerySet内的每个对象都进行注解，注解的信息直接存储为对象的一个新字段，因此其查询的返回值仍然是QuerySet。
 
 ```python
 from django.db.models import Sum,Count,Max,Min,Avg
@@ -748,9 +749,9 @@ class xxxxSerializer(serializers.ModelSerializer):
       device_id = serializers.CharField(required=False)
       
       class Meta:
-          model = xxx
-          fields = "__all__"
-          depth = 1
+      model = xxx
+      fields = "__all__"
+      depth = 1
       
   # 用户就可以在get请求时获取到device关联的详细信息，也能在发送post/put请求时，给device_id传递id值对数据进行更改。
   ```
@@ -798,6 +799,23 @@ class ServerViewSet(viewsets.ModelViewSet):
     pagination_class = Pagination
     pagination_class.page_size = 2 # 自定义单页条目
 ```
+
+- 常规分页
+
+  ```python
+  # 页码小于1时显示第一页
+  if page < 1 or page_size > len(mylist):
+      page = 1
+  # 页码大于最大页码时，显示最后一页
+  elif page > len(mylist) // page_size and len(mylist) // page_size == 0:
+      page = len(mylist) // page_size
+  # 页码大于最大页码时，显示最后一页
+  elif page > len(mylist) // page_size and len(mylist) // page_size != 0:
+      page = len(mylist) // page_size + 1
+  ret_1 = mylist[(page - 1) * page_size:page * page_size]
+  ```
+
+  
 
 ###### 3. 过滤器类
 
@@ -944,7 +962,7 @@ class ServerViewSet(viewsets.ModelViewSet):
 - 根据某个字段联合过滤（or的关系）
 
   > http://xxx:xx/xxx/?name=name1&name=name2&name=name3
-  
+
   ```python
   import django_filters
   from django.db.models import Q
@@ -981,11 +999,11 @@ class ServerViewSet(viewsets.ModelViewSet):
       serializer_class = xxxSerializer
       filterset_class = xxxFilter
   ```
-  
+
 - 根据某个字段联合过滤（and的关系）
 
   > 和or的关系类似，区别在于：query.connector = Q.AND  # and关系
-  
+
 - 多对多查询
 
   ```python
@@ -1589,6 +1607,7 @@ class CheckPermission(BasePermission):
 2. 数据导出
 
    ```python
+   
    ```
 
 ###### 3. 父子表三级联动
@@ -1661,8 +1680,8 @@ class CheckPermission(BasePermission):
 
 > You are trying to add the field 'created_at' with 'auto_now_add=True' to basicperformance without a default; the database needs something to populate existing rows.
 >
->   1) Provide a one-off default now (will be set on all existing rows)
->   2) Quit, and let me add a default in models.py
+>     1) Provide a one-off default now (will be set on all existing rows)
+>     2) Quit, and let me add a default in models.py
 >
 > Please enter the default value now, as valid Python
 > You can accept the default 'timezone.now' by pressing 'Enter' or you can provide another value.
@@ -2025,7 +2044,7 @@ class DepartSerializer(serializers.ModelSerializer):
       def get_v1(self, obj):
           return {"id": obj.gender, "text": obj.get_gender_display()}
       
-  # 针对choices，方式三：将方式一和方式二而结合
+  # 针对choices，方式三：将方式一和方式而结合
   # SerializerMethodField到底是如何实现的执行钩子方法？
   class MyCharField(serializers.IntegerField):
       def __init__(self, method_name=None, **kwargs):
@@ -2371,7 +2390,7 @@ urlpatterns += router.urls
           return 'Token'
   ```
 
--  permission.py
+- permission.py
 
   ```python
   from rest_framework.permissions import BasePermission
@@ -2386,7 +2405,7 @@ urlpatterns += router.urls
           return True
   ```
 
--  payload.py
+- payload.py
 
   ```python
   from django.core.cache import cache
@@ -2546,8 +2565,8 @@ class UserViewSet(viewsets.ModelViewSet):
 - 创建redis配置文件，为挂载操作做准备
 
   >  在D盘创建2个文件夹：conf、data
-  > conf目录用于挂载配置文件
-  > data目录用于存放数据持久化文件
+  >  conf目录用于挂载配置文件
+  >  data目录用于存放数据持久化文件
 
   - 在conf文件夹新建redis.conf文件
 
@@ -2849,6 +2868,4 @@ DRF_CROWN_DEFAULT_CONFIG = {"remain_request": True}
   - 以管理员身份待开cmd窗口，输入@"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"，回车。
   - 接着输入choco install jq -y
   ```
-
-  
 
