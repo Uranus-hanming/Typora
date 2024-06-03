@@ -959,6 +959,33 @@ class ServerViewSet(viewsets.ModelViewSet):
       search_fields = [i.name for i in GameTestCase._meta.fields]
   ```
 
+  ```python
+  from functools import reduce
+  from operator import or_
+  import django_filters
+  from django.db.models import Q
+  from mainapp.models import Issues
+  
+  class IssuesFilter(django_filters.FilterSet):
+      keyword = django_filters.CharFilter(method="get_keyword")
+  
+      def key_word(self, keyword, lookup_expr="icontains"):
+          # 获取模型的所有字段名
+          field_names = ["description", "id", "follower"]
+          # 创建Q对象列表，用于存储每个字段的模糊查询条件
+          q_list = [Q(**{f'{field}__{lookup_expr}': keyword}) for field in field_names]
+          # 使用reduce和or_将所有Q对象合并为一个大的Q对象，表示任意一个字段包含关键词即可
+          combined_q = reduce(or_, q_list)
+          return combined_q
+  
+      def get_keyword(self, queryset, name, value):
+          # 从url获取参数列表
+          keyword = self.request.query_params.get('keyword')
+          return queryset.filter(self.key_word(keyword))
+  ```
+
+  
+
 - 根据某个字段联合过滤（or的关系）
 
   > http://xxx:xx/xxx/?name=name1&name=name2&name=name3
