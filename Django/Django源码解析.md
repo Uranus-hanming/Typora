@@ -35,7 +35,27 @@
 
 ###### vscode配置及快捷操作
 
-
+- F5: debug模式运行
+- shift + F5: 停止debug运行
+- ctrl + F5: 非debug模式运行
+- debug模式快捷键：
+  - F5: 进入下一个断点
+  - F10: 执行下一行代码
+  - F11: 进入代码内部
+  - shift + F11: 从代码内部出来
+- ctrl + `: 打开终端和隐藏终端
+- ctrl + shift + n: 打开新的终端
+- 搜索：
+  - search: 查询内容
+  - files to include：可以在指定的文件中查询
+  - files to exclude：可以排除文件进行搜索
+- outline: 包含三种，分别为类、属性和方法
+- 可以设置自动保存，及保存时自动格式化？
+- 如何配置python虚拟环境？
+- open recent: 打开最近文件
+- 如何设置git?
+  - 如何提交代码到远程仓库及下拉更新？
+  - 如何查看提交历史完整记录信息？
 
 
 
