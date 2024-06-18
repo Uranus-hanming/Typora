@@ -844,7 +844,8 @@ class ServerViewSet(viewsets.ModelViewSet):
           fields = "__all__"
   
   class xxxFilter(django_filters.FilterSet):
-      pass
+      # 自定义某个字段匹配的规则
+      created = django_filters.CharFilter(lookup_expr="icontains")
   	class Meta:
           model = xxx
           # 注意，如果某个字段的属性是JSONField，如：game_config_detail = models.JSONField(verbose_name="档位配置详情", help_text="档位配置详情", default=dict)，fields就不能是"__all__"，必须将该字段排除在外。

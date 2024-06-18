@@ -2,6 +2,41 @@
 
 #### 一、Django源码的前置知识
 
+###### 脚本文件配置
+
+- 路径：.vscode/launch.json
+
+- 脚本：
+
+  ```json
+  {
+      // 使用 IntelliSense 了解相关属性。 
+      // 悬停以查看现有属性的描述。
+      // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+      "version": "0.2.0",
+      "configurations": [
+          {
+              "name": "Python 调试程序: Django",
+              "type": "debugpy",
+              "request": "launch",
+              "args": [
+                  "runserver",
+                  "0.0.0.0:8000",
+                  "--noreload"
+              ],
+              "django": true,
+              "justMyCode": false,
+              "autoStartBrowser": false,
+              "program": "${workspaceFolder}\\manage.py"
+          }
+      ]
+  }
+  ```
+
+###### vscode配置及快捷操作
+
+
+
 
 
 #### 二、Django命令原理解析
@@ -46,6 +81,57 @@ connection.commit() # cursor.execute()执行数据库修改的时候要执行com
 
 
 #### 五、Django核心模块的源码
+
+- cache.get() -> \_\_getattr__()
+- cache.set() -> \_\_setattr__()
+- cache.delete() -> \_\_delattr__()
+- cache['default'] -> \_\_getitem__()
+
+cache == caches['default'] == django.core.cache.backends.locmem.LocMemCache()
+
+cache.get() == LocMemCache().get()
+
+```python
+from django.utils.module_loading import import_string
+
+# 可以写成模块路径，以字符串的形式进行导入
+import_string("django.core.cache.backends.locmem.LocMemCache")
+```
+
+###### 邮件
+
+```python
+from django.core.mail import get_connection, send_mail
+
+password = 'qinzghnwppchbqvbajh'
+conn = get_connection(host='smtp.qq.com', username='973355982@qq.com', password=password)
+
+send_mail('来自B站的邮件测试', '邮件内容信息，hello world!', from_email='973355982@qq.com', recipient_list=['2963545066@qq.com'], connection=conn)
+```
+
+- 发送多封邮件
+
+```python
+from django.core.mail.message import EmailMessage
+
+subject = "这是多封邮件 - 主题"
+body = "这是多封邮件 - 内容"
+messages = []
+for i in range(3):
+    messages.append(EmailMessage(subject, body, '973355982@qq.com', to=['2963545066@qq.com'], cc=['973355982@qq.com'])
+
+conn.send_messages(messages)
+```
+
+###### 文件处理
+
+- 文件迁移
+
+  ```
+  from django.core.files.move import file_move_safe
+  ```
+
+- 
 
 
 
