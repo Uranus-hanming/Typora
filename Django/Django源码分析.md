@@ -2,11 +2,49 @@
 
 #### 一、Django源码的前置知识
 
+###### 安装插件
+
+- python
+
+- django
+
+- remote-ssh
+
+- SFTP
+
+  - 打开方式：ctrl + shift + p
+  - 上传：鼠标右键 -> upload file
+  - sftp.json:
+
+  ```json
+  {
+      "name": "My Server",
+      "host": "localhost",
+      "protocol": "sftp",
+      "port": 8022,
+      "username": "root",
+      "password": "123456",
+      "remotePath": "/root/work-project/first_project/first_django",
+      "ignore": [
+          ".vscode",
+          ".git",
+          ".DS_Store"
+      ],
+      "uploadOnSave": true,  
+      "useTempFile": false,
+      "openSsh": false
+  }
+  
+  # "uploadOnSave": # 实时同步
+  ```
+
 ###### 脚本文件配置
+
+- 打开方式：运行 -> 打开配置
 
 - 路径：.vscode/launch.json
 
-- 脚本：
+- 脚本1：
 
   ```json
   {
@@ -31,7 +69,44 @@
           }
       ]
   }
+  
+  # python manage.py runserver 0.0.0.0:8000 --noreload
+  # "justMyCode"：默认为True，配置为False时表示可以进入模块中进行断点
   ```
+
+- 脚本2：
+
+  ```json
+  {
+      // 使用 IntelliSense 了解相关属性。 
+      // 悬停以查看现有属性的描述。
+      // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+      "version": "0.2.0",
+      "configurations": [
+          {
+              "name": "Python: Django",
+              "type": "debugpy",
+              "request": "launch",
+              "program": "${workspaceRoot}/django/bin/django-admin.py",
+              "cwd": "D:/typora/work-project",
+              "env": {
+                  "PYTHONPATH": "${workspaceRoot}"
+              },
+              "args": [
+                  "startproject",
+                  "first_django"
+              ]
+          }
+      ]
+  }
+  
+  # "env"：将环境变量修正为当前目录的配置
+  # 含义：
+  	cd 目录；
+  	python django-admin.py startproject first_django
+  ```
+
+  
 
 ###### vscode配置及快捷操作
 
@@ -57,9 +132,31 @@
   - 如何提交代码到远程仓库及下拉更新？
   - 如何查看提交历史完整记录信息？
 
+###### 配置python解释器
 
+在设置中搜索python，在Python:Default Interpreter Path中添加python.exe路径：
+
+`C:/Users/hanming.qin/AppData/Local/Programs/Python/Python310/python.exe`
+
+###### 导入的模块含义
+
+- from django.conf import settings
+
+  ```
+  <LazySettings "first_django.settings">
+  工程项目中的settings.py文件
+  ```
+
+  
 
 #### 二、Django命令原理解析
+
+- django-admin startproject first_django
+- django-admin startapp books
+- python 进入交互模式和 python manage.py shell的区别
+- python manage.py makemigrations
+- python manage.py migrate
+- python manage.py runserver 0.0.0.0:8000
 
 
 
