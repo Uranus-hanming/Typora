@@ -147,16 +147,73 @@
   工程项目中的settings.py文件
   ```
 
-  
+- `sys` 模块主要提供与Python解释器及其环境交互的一些功能
 
-#### 二、Django命令原理解析
+  - `sys.argv`：获取命令行参数列表，第一个元素是脚本名称
+  - `sys.exit()`：以指定的状态码退出程序
+  - `sys.stdin`、`sys.stdout`、`sys.stderr`：用于读取输入和输出
+  - `sys.path`：包含模块搜索路径的列表
+  - `sys.version`：获取Python解释器的版本信息
 
-- django-admin startproject first_django
-- django-admin startapp books
-- python 进入交互模式和 python manage.py shell的区别
-- python manage.py makemigrations
-- python manage.py migrate
-- python manage.py runserver 0.0.0.0:8000
+- `os` 模块主要用于与操作系统进行交互。提供了访问文件系统、执行系统命令等功能
+
+  - `os.listdir()`：列出指定目录中的所有文件和目录
+
+    ```python
+    import os
+    print(os.listdir('.'))  # 列出当前目录下的所有文件和目录
+    ```
+
+  - `os.mkdir()`：创建目录
+
+  - `os.remove()`：删除文件
+
+  - `os.path`：提供了一系列路径操作函数
+
+    ```python
+    print(os.path.join('dir', 'file.txt'))  # 输出 'dir/file.txt'
+    print(os.path.abspath('file.txt'))  # 输出 'file.txt' 的绝对路径
+    ```
+
+  - `os.system()`：执行系统命令
+
+    ```python
+    os.system('echo Hello, World!')  # 在命令行打印 'Hello, World!'
+    ```
+
+  - `os.getenv()` 和 `os.putenv()`：获取和设置环境变量
+
+  - 进程管理
+
+    - `os.getpid()`：获取当前进程ID
+    - `os.fork()` 和 `os.exec*()` 系列函数：用于创建和管理进程（仅在类 Unix 系统上可用）
+
+
+
+
+#### 二、Django命令源码解析
+
+###### django-admin startproject first_django
+
+
+
+###### django-admin startapp books
+
+
+
+###### python 进入交互模式和 python manage.py shell的区别
+
+
+
+###### python manage.py makemigrations
+
+
+
+###### python manage.py migrate
+
+
+
+###### python manage.py runserver 0.0.0.0:8000
 
 
 
