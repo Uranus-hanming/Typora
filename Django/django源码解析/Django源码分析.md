@@ -138,6 +138,35 @@
 
 `C:/Users/hanming.qin/AppData/Local/Programs/Python/Python310/python.exe`
 
+###### 魔法函数
+
+- getattr
+
+  ```python
+  getattr(global_settings, setting)
+  # 获取属性值，等同于 global_settings.settings
+  ```
+
+- setattr
+
+  ```python
+  setattr(self, setting, setting_value)
+  # 给self对象设置属性值，即对象拥有了属性：setting=setting_value
+  ```
+
+- isinstance
+
+  ```python
+  # 判断类型
+  isinstance(setting_value, (list, tuple))
+  ```
+
+- dir
+
+  > 返回一个对象的**属性**和**方法**列表
+
+- hasattr
+
 ###### 导入的模块含义
 
 - from django.conf import settings
@@ -188,12 +217,99 @@
     - `os.getpid()`：获取当前进程ID
     - `os.fork()` 和 `os.exec*()` 系列函数：用于创建和管理进程（仅在类 Unix 系统上可用）
 
+  - os.walk(path)
+
+    ```python
+    for root, dirs, files in os.walk(path):
+        pass
+    ```
+
+  - os.environ
+  
+    ```python
+    # 设置环境变量 DJANGO_SETTINGS_MODULE 的默认值为 "first_django.settings"
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "first_django.settings")
+    ```
+  
+    
+  
+- from importlib import import_module
+
+  ```python
+  # 以字符串的方式导入模块
+  # mod是first_django.settings文件对象，可以通过 mod.属性名 来获取对象的key-value中的value值
+  mod = import_module("first_django.settings")
+  ```
+
+  
+
 
 
 
 #### 二、Django命令源码解析
 
 ###### django-admin startproject first_django
+
+```
+django\core\management\templates.py
+	class TemplateCommand(BaseCommand):
+		# 最终执行具体的业务逻辑的方法
+		def handle(self, app_or_project, name, target=None, **options):
+			pass
+
+django\core\management\commands\startproject.py
+	class Command(TemplateCommand):
+		def handle(self, **options):
+			# 执行的是父类 TemplateCommand 中的 handle()
+			super().handle('project', project_name, target, **options)
+
+django\core\management\base.py
+	class BaseCommand:
+		def execute(self, *args, **options):def execute(self, *args, **options):
+			# self指的是django.core.management.commands.startproject.Command 对象
+			# 执行的是Command类中的 handle 方法
+			output = self.handle(*args, **options)
+
+		def run_from_argv(self, argv):
+			# self指的是django.core.management.commands.startproject.Command 对象
+			# Command类中没有定义execute方法，就找父类 TemplateCommand，父类 TemplateCommand 也没有实现execute()，
+			# 所以最终执行的是BaseCommand类中的execute()
+			self.execute(*args, **cmd_options)
+
+django\core\management\__init__.py
+	class ManagementUtility:
+		def load_command_class(app_name, name):
+			# 以字符串的方式导入模块
+		    module = import_module("%s.management.commands.%s" % (app_name, name))
+		    # 实例化的是django\core\management\commands\startproject路径下的Command
+		    return module.Command()
+
+		def fetch_command(self, subcommand):
+			# subcommand='startproject'
+			# app_name='django.core'
+			app_name = commands[subcommand]
+			klass = load_command_class(app_name, subcommand)
+			return klass  # 返回的是django.core.management.commands.startproject.Command 对象
+
+		def execute(self):
+			# 即子命令，本例子中为：startproject
+			subcommand = self.argv[1]
+			# 执行的实际是django.core.management.commands.startproject.Command对象run_from_argv()
+			self.fetch_command(subcommand).run_from_argv(self.argv)
+
+	def execute_from_command_line(argv=None):
+		# argv=None
+	    utility = ManagementUtility(argv)  # 实例化ManagementUtility
+	    utility.execute()  # 执行ManagementUtility类的execute()
+
+django-admin.py
+执行命令：django-admin.py startproject second_django
+
+	from django.core.management import execute_from_command_line
+	sys.argv[0] = re.sub(r"(-script\.pyw|\.exe)?$", "", sys.argv[0])
+	sys.exit(execute_from_command_line())
+
+```
 
 
 
@@ -230,6 +346,68 @@
 4. 为什么能对查询结果使用切片？当使用Django操作数据库时，懒查询指的是什么？
 5. DjangoBooks为什么要通过objects属性才能调用all()、filter。等方法，为什么要通过objects 属性才能进行链式操作？
 
+###### setting.py配置加载逻辑
+
+```
+django/conf/__init__.py
+	class Settings:
+		def __init__(self, settings_module):  # 'first_django.settings'
+			# 先从 global_settings 导入属性，然后再从 first_django.settings 属性，如果属性名相同的会覆盖global_settings中的属性，
+			# 因此给用户的感觉是配置会优先从first_django.settings中查找，找不到时才去global_settings中查找
+			for setting in dir(global_settings):
+	            if setting.isupper():
+	                # self指的是Settings对象，这里的含义是将global_settings属性值赋给Settings对象
+	                setattr(self, setting, getattr(global_settings, setting))
+	        
+	        self.SETTINGS_MODULE = settings_module
+	        # 导入first_django.settings
+	        mod = importlib.import_module(self.SETTINGS_MODULE)
+
+	        for setting in dir(mod):
+	            if setting.isupper():
+	                setting_value = getattr(mod, setting)
+	                setattr(self, setting, setting_value)
+
+	class LazySettings(LazyObject):
+		def _setup(self, name=None):
+			# os.environ.setdefault("DJANGO_SETTINGS_MODULE", "first_django.settings")  # manage.py文件中的配置
+			# ENVIRONMENT_VARIABLE = "DJANGO_SETTINGS_MODULE"
+			settings_module = os.environ.get(ENVIRONMENT_VARIABLE)
+			self._wrapped = Settings(settings_module)
+
+		def __getattr__(self, name):
+	        if self._wrapped is empty:
+	            self._setup(name)
+	        # self._wrapped是 Settings 对象，因此是去获取Settings对象中的属性
+	        val = getattr(self._wrapped, name)
+	        # 添加缓存，懒加载，获取属性的时候，会首先从__dict__里面获取。如果该属性存在就输出其值，如果不存在则会去找_getatrr_方法。
+	        self.__dict__[name] = val
+	        return val
+
+		settings = LazySettings()
+
+from django.conf import settings
+# 获取数据库配置信息
+settings.DATABASES  # 调用的是LazySettings对象的__getattr__方法
+```
+
+###### mysqlclient模块操作
+
+```python
+import MySQLdb
+conn = MySQLdb.Connect(host='', port=3306, user='root', passwd='', db='', charset='utf8')
+cursor = conn.cursor()
+cursor.execute('sql原生语句')
+
+cursor.fetchone()
+cursor.fetchmany(5)
+cursor.fetchall()
+connection.commit() # cursor.execute()执行数据库修改的时候要执行commit()方法
+
+cursor.close()
+conn.close()
+```
+
 ###### 在django中执行原生SQL语句
 
 ```python
@@ -242,6 +420,9 @@ cursor.fetchone()
 cursor.fetchmany(5)
 cursor.fetchall()
 connection.commit() # cursor.execute()执行数据库修改的时候要执行commit()方法
+
+cursor.close()
+conn.close()
 ```
 
 ###### 重要的类
