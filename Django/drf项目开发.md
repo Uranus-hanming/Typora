@@ -10,21 +10,30 @@
 
 4. run/debug configurations
 
-   - django server
-   - python：生成迁移文件以及迁移文件
-     - 添加.env file：src/api/bk_power/settings/run.env
-     - D:/modou/bk_power/src/api/manage.py(migrate/makemigrations)
+   - `D:/modou/bk_power/src/api/manage.py`
+
+   - 执行命令
+
+     ```python
+     runserver 127.0.0.1:8000
+     makemigrations
+     migrate
+     ```
+
+   - Paths to ".env" file：src/api/bk_power/settings/run.env
 
 5. 环境变量配置
 
    - 安装插件 EnvFile(file->settings->plugins)
-   - 将run.env文件存放在\src\api\bk_power\settings 目录下
+   - 将run.env文件存放在\src\api\bk_power\settings 目录下，修改DB_PASSWORD=123456
 
 6. 安装依赖
 
    ```shell
-   pip install -r requirement.txt
-   pip install lib_tar目录下的压缩包
+   pip install poetry
+   # 初次直接执行
+   poetry install
+   pip install lib_tar目录下的.tar.gz
    ```
 
 7. bk_power\settings\overlays\front.py配置静态文件
@@ -45,7 +54,15 @@
    # csrf_middleware.py文件存放在bk_power/tests目录下
    ```
 
-9. 在viewsets下的每个文件夹下的__ini\_\_.py里添加如下命令
+9. 注释\bk_power\ecology\apps.py下的代码
+
+   ```python
+   # from bk_power.ecology import signals  # noqa
+   # if settings.BK_APP_CODE and settings.SECUREKEY_APM:
+   #     BluekingInstrumentor().instrument()
+   ```
+
+10. 在viewsets下的每个文件夹下的__ini\_\_.py里添加如下命令
 
    ```python
    from .xxx import * # noqa
@@ -54,9 +71,9 @@
    # 目的是可以跨目录导入，如：viewsets文件夹下有个knowledge_school文件夹，其下有两个.py文件，分别是__ini.py、knowledge_info.py，knowledge_info.py里有KnowledgeViewSet类，__ini.py文件里直接导入from .knowledge_info import *，viewsets.KnowledgeViewSet就可以直接访问到。
    ```
 
-10. 项目权限管理（ecology\permissions\sys.py）
+11. 项目权限管理（ecology\permissions\sys.py）
 
-11. 项目合并注意事项
+12. 项目合并注意事项
 
     - 上传代码的时候记得要先拉一下，免得冲突了
 
