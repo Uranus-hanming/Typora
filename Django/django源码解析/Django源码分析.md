@@ -111,23 +111,36 @@
 ###### vscode配置及快捷操作
 
 - F5: debug模式运行
+
 - shift + F5: 停止debug运行
+
 - ctrl + F5: 非debug模式运行
+
 - debug模式快捷键：
   - F5: 进入下一个断点
   - F10: 执行下一行代码
   - F11: 进入代码内部
   - shift + F11: 从代码内部出来
+  
 - ctrl + `: 打开终端和隐藏终端
+
 - ctrl + shift + n: 打开新的终端
+
 - 搜索：
   - search: 查询内容
   - files to include：可以在指定的文件中查询
   - files to exclude：可以排除文件进行搜索
+  
 - outline: 包含三种，分别为类、属性和方法
+
 - 可以设置自动保存，及保存时自动格式化？
+
+  > 在设置中找到格式化，勾选format on save
+
 - 如何配置python虚拟环境？
+
 - open recent: 打开最近文件
+
 - 如何设置git?
   - 如何提交代码到远程仓库及下拉更新？
   - 如何查看提交历史完整记录信息？
@@ -150,6 +163,8 @@
 - setattr
 
   ```python
+  setattr(cls, name, value)
+  # 给cls对象设置属性值，即对象拥有了属性：setting=setting_value
   setattr(self, setting, setting_value)
   # 给self对象设置属性值，即对象拥有了属性：setting=setting_value
   ```
@@ -166,6 +181,56 @@
   > 返回一个对象的**属性**和**方法**列表
 
 - hasattr
+
+###### 元类
+
+```python
+from django.db import models
+class Books(models.Model):
+    pass
+
+class Model(metaclass=ModelBase):
+    pass
+
+class ModelBase(type):
+    def __new__(cls, name, bases, attrs, **kwargs):
+        # name：要创建的类名
+        # bases：继承的父类
+        # attrs：类的属性
+        #return super().__new__(cls, name, bases, attrs)
+        new_class._prepare()
+        new_class._meta.apps.register_model(new_class._meta.app_label, new_class)
+        return new_class
+    
+    def _prepare(cls):
+        # from django.db.models.manager import Manager
+        manager = Manager()  # 得到一个管理对象
+        manager.auto_created = True
+        cls.add_to_class("objects", manager)  # 模型类的objects属性
+        
+    def add_to_class(cls, name, value):
+        setattr(cls, name, value)
+
+from django.db.models.query import QuerySet
+class Manager(BaseManager.from_queryset(QuerySet)):
+    pass
+
+class BaseManager:
+    @classmethod
+    def from_queryset(cls, queryset_class, class_name=None):
+        if class_name is None:
+            class_name = '%sFrom%s' % (cls.__name__, queryset_class.__name__)
+        # 返回创建的动态类
+        # 模型类.objects拥有所有QuerySet类所有方法的根本原因
+        # 因此想要查看模型类管理器所拥有的方法，参考from django.db.models.query import QuerySet 的方法。
+        return type(class_name, (cls,), {
+            '_queryset_class': queryset_class,
+            **cls._get_queryset_methods(queryset_class),
+        })
+
+```
+
+
 
 ###### 导入的模块含义
 
