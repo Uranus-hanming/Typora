@@ -914,7 +914,9 @@ class ServerViewSet(viewsets.ModelViewSet):
 
 - 根据多个字段联合过滤（and的关系）
 
-  > 可以联合field=v1,v2,v3使用，也可以field=v1, field=v2,field=v3 ???
+  > 这里不可以联合field=v1,v2,v3使用，也可以field=v1, field=v2,field=v3
+  >
+  > 只能?field1=value1&field2=value2&field3=value3...
 
   ```python
   # 自定义过滤器类
