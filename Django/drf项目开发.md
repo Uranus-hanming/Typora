@@ -1213,6 +1213,31 @@ class ServerViewSet(viewsets.ModelViewSet):
 
 ###### 5. 权限类
 
+1. 视图类中配置
+
+   ```python
+   认证：authentication_classes = []
+   权限：permission_classes = []
+   ```
+
+2. settings.py 默认配置文件
+
+   ```python
+   REST_FRAMEWORK = {
+       # 配置认证方式的选项
+       'DEFAULT_AUTHENTICATION_CLASSES': (
+           'rest_framework.authentication.SessionAuthentication', # session认证
+           'rest_framework.authentication.BasicAuthentication',   # 基本认证
+       ),
+       # 权限配置
+       'DEFAULT_PERMISSION_CLASSES': (
+           'rest_framework.permissions.IsAuthenticated',
+       )
+   }
+   ```
+
+   
+
 1. 权限校验：CheckPermission
 2. IsAuthenticated
 
