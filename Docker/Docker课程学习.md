@@ -264,6 +264,12 @@
 
    > ***可以把容器看做是一个简易版的linux环境***（包括root用户权限、进程空间、用户空间和网络空间等）和运行在其中的应用程序。
 
+3. 容器调试
+
+   ```
+   docker run -it --entrypoint /bin/bash bf9a44845a0c
+   ```
+
 ###### 创建容器(docker create)
 > 使用docker create 命令新建的容器处于停止状态，可以使用docker [container] start命令来启动它。
 > 选项：与容器运行模式相关、与容器环境配置相关、与容器资源限制和安全保护相关。

@@ -6,6 +6,11 @@
 
 - python
 
+- 配置 VSCode 使用虚拟环境
+
+  - **选择解释器**：按 `Ctrl+Shift+P` 打开命令面板，然后输入并选择“Python: Select Interpreter”。
+  - **选择虚拟环境**：从列表中选择你刚刚创建的虚拟环境。(xxx\xxx\python.exe)
+
 - django
 
 - remote-ssh
@@ -44,7 +49,7 @@
 
 - 路径：.vscode/launch.json
 
-- 脚本1：
+- 脚本1：django项目脚本配置
 
   ```json
   {
@@ -74,7 +79,7 @@
   # "justMyCode"：默认为True，配置为False时表示可以进入模块中进行断点
   ```
 
-- 脚本2：
+- 脚本2：django源码配置
 
   ```json
   {
@@ -109,6 +114,8 @@
   
 
 ###### vscode配置及快捷操作
+
+- alt + 左右箭头：向前向后追溯代码
 
 - F5: debug模式运行
 

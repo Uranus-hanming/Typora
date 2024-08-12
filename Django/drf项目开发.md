@@ -32,8 +32,8 @@
    ```shell
    pip install poetry
    # 初次直接执行
-   poetry install
    pip install lib_tar目录下的.tar.gz
+   poetry install
    ```
 
 7. bk_power\settings\overlays\front.py配置静态文件
@@ -1008,14 +1008,18 @@ class ServerViewSet(viewsets.ModelViewSet):
 
 - 根据某个字段联合过滤（or的关系）
 
-  > http://xxx:xx/xxx/?name=name1&name=name2&name=name3
+  > http://xxx:xx/xxx/?name1=name1&name1=name2&name1=name3&name2=name1&name2=name2&value=value1&value=value2
+  >
+  > 相同字段之间是or关系，不同字段之间的过滤条件是and的关系
 
   ```python
   import django_filters
   from django.db.models import Q
   
   class xxxFilter(django_filters.FilterSet):
-      name = django_filters.CharFilter(method="get_name")
+      name1 = django_filters.CharFilter(method="get_name1")
+      name2 = django_filters.CharFilter(method="get_name2")
+      value = django_filters.CharFilter(method="get_value")
   
       def build_or_condition_query(self, field, values, lookup_expr="icontains"):
           """构造 "or" 查询条件，根据一个字段来筛选不同的值"""
@@ -1034,12 +1038,20 @@ class ServerViewSet(viewsets.ModelViewSet):
           combined_q = reduce(or_, q_list)
           return combined_q
   
-      def get_name(self, queryset, name, value):
+      def get_name1(self, queryset, name, value):
           # 从url获取参数列表
-          values = self.request.query_params.getlist('name')
+          values = self.request.query_params.getlist('name1')
           # 过滤条件为A and B，其中A和B里面都为or关系
           # 此处的QuerySet对象的filter()方法，可以构造各种方式的查询条件。
           return queryset.filter(self.build_or_condition_query(name, values) & self.keyword(keyword))
+      
+      def get_name(self, queryset, name, value):
+          values = self.request.query_params.getlist('name2')
+          return queryset.filter(self.build_or_condition_query(name, values))
+      
+      def get_value(self, queryset, name, value):
+          values = self.request.query_params.getlist('value')
+          return queryset.filter(self.build_or_condition_query(name, values))
       
   class xxxViewSet(viewsets.ModelViewSet):
       queryset = xxx.objects.all()
