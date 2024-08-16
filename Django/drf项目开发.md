@@ -525,6 +525,29 @@ models.Tb1.objects.filter(name='seven').delete() # 删除指定条件的数据
    models.objects.bulk_update(update_data, ['field1', 'field2', 'field3'])
    ```
 
+ 5. 查询或创建：get_or_create()
+
+    > 在 Django 中，`Role.objects.get_or_create()` 是一个用于获取对象或创建对象的方法。这个方法的返回值是一个包含两个元素的元组：
+    >
+    > 1. **对象实例**：如果对象存在，它将是该对象的实例；如果对象不存在，它将是新创建的对象的实例。
+    > 2. **布尔值**：指示对象是否是新创建的。如果对象已经存在，布尔值为 `False`；如果对象是新创建的，布尔值为 `True`。
+
+    ```python
+    from myapp.models import Role
+    
+    # 尝试获取或创建一个 Role 对象
+    role, created = Role.objects.get_or_create(name='Admin')
+    
+    # role 是 Role 对象的实例
+    # 可以在模型类Role中进行自定义 def __str__(self):
+    print(role)  # <Role: Admin>
+    
+    # created 是一个布尔值，表示 Role 对象是否被创建
+    print(created)  # True 如果新创建了对象，否则 False
+    ```
+
+    
+
 ###### 8. 模型关系
 
 1. 一对多关系(ForeignKey)
