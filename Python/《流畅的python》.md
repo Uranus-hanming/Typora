@@ -1640,40 +1640,40 @@ running register(active=False)->decorate(<function f2 at 0x10073c268>)
 
   ```python
   import time
+    
+    DEFAULT_FMT = '[{elapsed:0.8f}s] {name}({args}) -> {result}'
   
-  DEFAULT_FMT = '[{elapsed:0.8f}s] {name}({args}) -> {result}'
-
-
-  def clock(fmt=DEFAULT_FMT):  # ➊ clock 是参数化装饰器工厂函数。
-      def decorate(func):  # ➋ decorate 是真正的装饰器。
-          def clocked(*_args):  # ➌ clocked 包装被装饰的函数。
-              t0 = time.time()
-              _result = func(*_args)  # ➍ _result 是被装饰的函数返回的真正结果。
-              elapsed = time.time() - t0
-              name = func.__name__
-              args = ', '.join(repr(arg) for arg in _args)  # ➎ _args 是 clocked 的参数，args 是用于显示的字符串。
-              result = repr(_result)  # ➏ result 是 _result 的字符串表示形式，用于显示。
-              print(fmt.format(**locals()))  # ➐ 这里使用 **locals() 是为了在 fmt 中引用 clocked 的局部变量。
-              return _result  # ➑ clocked 会取代被装饰的函数，因此它应该返回被装饰的函数返回的值。
-          return clocked  # ➒ decorate 返回 clocked。
-      return decorate  # ➓ clock 返回 decorate。
-
-
-  if __name__ == '__main__':
-      @clock()
-      # @clock('{name}: {elapsed}s')
-      # @clock('{name}({args}) dt={elapsed:0.3f}s')
-      def snooze0(seconds):
-          time.sleep(seconds)
-
-
-      for i in range(3):
-          snooze0(.123)
-  """
-  [0.12412500s] snooze(0.123) -> None
-  [0.12411904s] snooze(0.123) -> None
-  [0.12410498s] snooze(0.123) -> None
-  """
+  
+    def clock(fmt=DEFAULT_FMT):  # ➊ clock 是参数化装饰器工厂函数。
+        def decorate(func):  # ➋ decorate 是真正的装饰器。
+            def clocked(*_args):  # ➌ clocked 包装被装饰的函数。
+                t0 = time.time()
+                _result = func(*_args)  # ➍ _result 是被装饰的函数返回的真正结果。
+                elapsed = time.time() - t0
+                name = func.__name__
+                args = ', '.join(repr(arg) for arg in _args)  # ➎ _args 是 clocked 的参数，args 是用于显示的字符串。
+                result = repr(_result)  # ➏ result 是 _result 的字符串表示形式，用于显示。
+                print(fmt.format(**locals()))  # ➐ 这里使用 **locals() 是为了在 fmt 中引用 clocked 的局部变量。
+                return _result  # ➑ clocked 会取代被装饰的函数，因此它应该返回被装饰的函数返回的值。
+            return clocked  # ➒ decorate 返回 clocked。
+        return decorate  # ➓ clock 返回 decorate。
+  
+  
+    if __name__ == '__main__':
+        @clock()
+        # @clock('{name}: {elapsed}s')
+        # @clock('{name}({args}) dt={elapsed:0.3f}s')
+        def snooze0(seconds):
+            time.sleep(seconds)
+  
+  
+        for i in range(3):
+            snooze0(.123)
+    """
+    [0.12412500s] snooze(0.123) -> None
+    [0.12411904s] snooze(0.123) -> None
+    [0.12410498s] snooze(0.123) -> None
+    """
   ```
 
 
@@ -1717,7 +1717,7 @@ u = (30, 40)
 f(t, u)  # (10, 20, 30, 40)
 # t, u ➌ 元组 t 没变。
 # ((10, 20), (30, 40))
-  ```
+ ```
 
 ##### 避免使用可变的对象作为参数的默认值。
 
@@ -1844,28 +1844,28 @@ class TwilightBus:
 
   ```python
   class Cheese:
-      def __init__(self, kind):
-          self.kind = kind
+        def __init__(self, kind):
+            self.kind = kind
+    
+        def __repr__(self):
+            return 'Cheese(%r)' % self.kind
   
-      def __repr__(self):
-          return 'Cheese(%r)' % self.kind
-
-
-  import weakref
-
-  stock = weakref.WeakValueDictionary()  # ➊ stock 是 WeakValueDictionary 实例。
-  catalog = [Cheese('Red Leicester'), Cheese('Tilsit'),
-             Cheese('Brie'), Cheese('Parmesan')]
-  for cheese in catalog:
-      stock[cheese.kind] = cheese  # ➋ stock 把奶酪的名称映射到 catalog 中 Cheese 实例的弱引用上。
-
-  print(sorted(stock.keys()))
-  # ['Brie', 'Parmesan', 'Red Leicester', 'Tilsit'] ➌ stock 是完整的。
-  del catalog
-  print(sorted(stock.keys()))
-  # ['Parmesan'] ➍ 删除 catalog 之后，stock 中的大多数奶酪都不见了，这是WeakValueDictionary 的预期行为。为什么不是全部呢？
-  del cheese
-  print(sorted(stock.keys()))
+  
+    import weakref
+  
+    stock = weakref.WeakValueDictionary()  # ➊ stock 是 WeakValueDictionary 实例。
+    catalog = [Cheese('Red Leicester'), Cheese('Tilsit'),
+               Cheese('Brie'), Cheese('Parmesan')]
+    for cheese in catalog:
+        stock[cheese.kind] = cheese  # ➋ stock 把奶酪的名称映射到 catalog 中 Cheese 实例的弱引用上。
+  
+    print(sorted(stock.keys()))
+    # ['Brie', 'Parmesan', 'Red Leicester', 'Tilsit'] ➌ stock 是完整的。
+    del catalog
+    print(sorted(stock.keys()))
+    # ['Parmesan'] ➍ 删除 catalog 之后，stock 中的大多数奶酪都不见了，这是WeakValueDictionary 的预期行为。为什么不是全部呢？
+    del cheese
+    print(sorted(stock.keys()))
   ```
 
 ### 符合python风格的对象
@@ -1972,7 +1972,7 @@ print(format(Vector2d(1, 1), '.3ep'))
 '<1.414e+00, 7.854e-01>'
 print(format(Vector2d(1, 1), '0.5fp'))
 '<1.41421, 0.78540>'
-  ```
+```
 
 ##### classmethod与staticmethod
 
@@ -3688,23 +3688,23 @@ print(monster)
 - 使用生成器实现的上下文管理器
 
   ```python
-  import contextlib
-
-
-  @contextlib.contextmanager  # ➊ 应用 contextmanager 装饰器。
-  def looking_glass():
-      import sys
-      original_write = sys.stdout.write  # ➋ 贮存原来的 sys.stdout.write 方法。
-
-      def reverse_write(text):  # ➌ 定义自定义的 reverse_write 函数；在闭包中可以访问original_write。
-          original_write(text[::-1])
-      sys.stdout.write = reverse_write  # ➍ 把 sys.stdout.write 替换成 reverse_write。
-      yield 'JABBERWOCKY'  # ➎ 产出一个值，这个值会绑定到 with 语句中 as 子句的目标变量上。执行 with 块中的代码时，这个函数会在这一点暂停。
-      sys.stdout.write = original_write  # ➏ 控制权一旦跳出 with 块，继续执行 yield 语句之后的代码；这里是恢复成原来的 sys. stdout.write 方法。
-
-  with looking_glass() as what:  # ➊
-         print('Alice, Kitty and Snowdrop')
-         print(what)
+    import contextlib
+  
+  
+    @contextlib.contextmanager  # ➊ 应用 contextmanager 装饰器。
+    def looking_glass():
+        import sys
+        original_write = sys.stdout.write  # ➋ 贮存原来的 sys.stdout.write 方法。
+  
+        def reverse_write(text):  # ➌ 定义自定义的 reverse_write 函数；在闭包中可以访问original_write。
+            original_write(text[::-1])
+        sys.stdout.write = reverse_write  # ➍ 把 sys.stdout.write 替换成 reverse_write。
+        yield 'JABBERWOCKY'  # ➎ 产出一个值，这个值会绑定到 with 语句中 as 子句的目标变量上。执行 with 块中的代码时，这个函数会在这一点暂停。
+        sys.stdout.write = original_write  # ➏ 控制权一旦跳出 with 块，继续执行 yield 语句之后的代码；这里是恢复成原来的 sys. stdout.write 方法。
+  
+    with looking_glass() as what:  # ➊
+           print('Alice, Kitty and Snowdrop')
+           print(what)
   ```
 
 
@@ -3730,7 +3730,7 @@ def looking_glass():
           sys.stdout.write = original_write  # ➌ 撤销对 sys.stdout.write 方法所做的猴子补丁。
           if msg:
             print(msg)  # ➍ 如果设置了错误消息，把它打印出来。
-  ```
+ ```
 
 ### 协程
 
@@ -3870,46 +3870,46 @@ getgeneratorstate(my_coro2)  # ➏ getgeneratorstate 函数指明，处于 GEN_C
 
   ```python
   from functools import wraps
-
-
-  def coroutine(func):
-      """装饰器：向前执行到第一个`yield`表达式，预激`func`"""
-
-      @wraps(func)
-      def primer(*args, **kwargs):  # ➊ 把被装饰的生成器函数替换成这里的 primer 函数；调用 primer 函数时，返回预激后的生成器。
-          gen = func(*args, **kwargs)  # ➋ 调用被装饰的函数，获取生成器对象。
-          next(gen)  # ➌ 预激生成器。
-          return gen  # ➍ 返回生成器。
-    
-      return primer
-
-
-  @coroutine  # ➎ 把装饰器应用到 averager 函数上。
-  def averager():
-      total = 0.0
-      count = 0
-      average = None
-      while True:  # ➊ 这个无限循环表明，只要调用方不断把值发给这个协程，它就会一直接收值，然后生成结果。仅当调用方在协程上调用 .close() 方法，或者没有对协程的引用而被垃圾回收程序回收时，这个协程才会终止。
-          term = yield average  # ➋ 这里的 yield 表达式用于暂停执行协程，把结果发给调用方；还用于接收调用方后面发给协程的值，恢复无限循环。
-          total += term
-          count += 1
-          average = total / count
-
-
-  coro_avg = averager()  # ➊ 调用 averager() 函数创建一个生成器对象，在 coroutine 装饰器的 primer 函数中已经预激了这个生成器。
-
-  from inspect import getgeneratorstate
-
-  print(getgeneratorstate(coro_avg))  # ➋ getgeneratorstate 函数指明，处于 GEN_SUSPENDED 状态，因此这个协程已经准备好，可以接收值了。
-
-  'GEN_SUSPENDED'
-
-  print(coro_avg.send(10))  # ➌ 可以立即开始把值发给 coro_avg——这正是 coroutine 装饰器的目的。
-  # 10.0
-  print(coro_avg.send(30))
-  # 20.0
-  print(coro_avg.send(5))
-  # 15.0
+  
+  
+    def coroutine(func):
+        """装饰器：向前执行到第一个`yield`表达式，预激`func`"""
+  
+        @wraps(func)
+        def primer(*args, **kwargs):  # ➊ 把被装饰的生成器函数替换成这里的 primer 函数；调用 primer 函数时，返回预激后的生成器。
+            gen = func(*args, **kwargs)  # ➋ 调用被装饰的函数，获取生成器对象。
+            next(gen)  # ➌ 预激生成器。
+            return gen  # ➍ 返回生成器。
+      
+        return primer
+  
+  
+    @coroutine  # ➎ 把装饰器应用到 averager 函数上。
+    def averager():
+        total = 0.0
+        count = 0
+        average = None
+        while True:  # ➊ 这个无限循环表明，只要调用方不断把值发给这个协程，它就会一直接收值，然后生成结果。仅当调用方在协程上调用 .close() 方法，或者没有对协程的引用而被垃圾回收程序回收时，这个协程才会终止。
+            term = yield average  # ➋ 这里的 yield 表达式用于暂停执行协程，把结果发给调用方；还用于接收调用方后面发给协程的值，恢复无限循环。
+            total += term
+            count += 1
+            average = total / count
+  
+  
+    coro_avg = averager()  # ➊ 调用 averager() 函数创建一个生成器对象，在 coroutine 装饰器的 primer 函数中已经预激了这个生成器。
+  
+    from inspect import getgeneratorstate
+  
+    print(getgeneratorstate(coro_avg))  # ➋ getgeneratorstate 函数指明，处于 GEN_SUSPENDED 状态，因此这个协程已经准备好，可以接收值了。
+  
+    'GEN_SUSPENDED'
+  
+    print(coro_avg.send(10))  # ➌ 可以立即开始把值发给 coro_avg——这正是 coroutine 装饰器的目的。
+    # 10.0
+    print(coro_avg.send(30))
+    # 20.0
+    print(coro_avg.send(5))
+    # 15.0
   ```
 
 
@@ -3964,7 +3964,7 @@ print(coro_avg.send(60))  # ➌ 由于在协程内没有处理异常，协程会
 # Traceback (most recent call last):
 # File "<stdin>", line 1, in <module>
 # StopIteration
-  ```
+ ```
 
 - generator.throw(exc_type[, exc_value[, traceback]])
 
@@ -4045,22 +4045,22 @@ print(getgeneratorstate(exc_coro))
 
   ```python
   class DemoException(Exception):
-      """为这次演示定义的异常类型。"""
-
-
-  def demo_finally():
-      # 使用 try/finally 块在协程终止时执行操作
-      print('-> coroutine started')
-      try:
-          while True:
-              try:
-                  x = yield
-              except DemoException:
-                  print('*** DemoException handled. Continuing...')
-              else:
-                  print('-> coroutine received: {!r}'.format(x))
-      finally:
-          print('-> coroutine ending')
+        """为这次演示定义的异常类型。"""
+  
+  
+    def demo_finally():
+        # 使用 try/finally 块在协程终止时执行操作
+        print('-> coroutine started')
+        try:
+            while True:
+                try:
+                    x = yield
+                except DemoException:
+                    print('*** DemoException handled. Continuing...')
+                else:
+                    print('-> coroutine received: {!r}'.format(x))
+        finally:
+            print('-> coroutine ending')
   ```
 
 
@@ -4131,36 +4131,35 @@ print(coro_avg.send(None))  # ➋
 
   ```python
   def gen():
-      for c in 'AB':
-          yield c
-      for i in range(1, 3):
-          yield i
-
-
-  print(list(gen()))
-
-
-  # ['A', 'B', 1, 2]
-
-  def gen_for():
-      yield from 'AB'
-      yield from range(1, 3)
-
-
-  print(list(gen_for()))
-  # ['A', 'B', 1, 2]
-
-```py
-def chain(*iterables):
-  for it in iterables:
-  yield from it
-
-  s = 'ABC'
-  t = tuple(range(3))
-  print(list(chain(s, t)))
-  # ['A', 'B', 'C', 0, 1, 2]
-```
-
+        for c in 'AB':
+            yield c
+        for i in range(1, 3):
+            yield i
+  
+  
+    print(list(gen()))
+  
+  
+    # ['A', 'B', 1, 2]
+  
+    def gen_for():
+        yield from 'AB'
+        yield from range(1, 3)
+  
+  
+    print(list(gen_for()))
+    # ['A', 'B', 1, 2]
+  
+  
+  def chain(*iterables):
+    for it in iterables:
+    yield from it
+  
+    s = 'ABC'
+    t = tuple(range(3))
+    print(list(chain(s, t)))
+    # ['A', 'B', 'C', 0, 1, 2]
+  ```
 
 - 委派生成器
 

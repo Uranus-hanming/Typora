@@ -957,7 +957,8 @@ class ServerViewSet(viewsets.ModelViewSet):
               q_objects |= Q(age__gte=min_age)
           if max_age:
               q_objects |= Q(age__lte=max_age)
-  
+  		
+          # 调用QuerySet的filter方法
           queryset = queryset.filter(q_objects)
           return queryset
   ```

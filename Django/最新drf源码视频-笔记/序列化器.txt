@@ -184,7 +184,7 @@
 	queryset = UserInfo.objects.all()
 	ser = UserSerializer(instance=queryset, many=True)  # 实例化 ListSerializer( obj = UserSerializer() )
 
-4.出发序列化-当前类 ser.data
+4.触发序列化-当前类 ser.data
 
 5.触发序列化-ListSerializer ser.data
 	ser.data => 循环 + 第4步基础上

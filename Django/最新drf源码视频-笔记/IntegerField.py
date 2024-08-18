@@ -79,6 +79,7 @@ class SerializerMetaclass(type):
 
     def __new__(cls, name, bases, attrs):
         attrs['_declared_fields'] = cls._get_declared_fields(bases, attrs) # {自己的字段对象 + 父类字段对象}
+        # 创建类
         return super().__new__(cls, name, bases, attrs)
 
 class BaseSerializer(Field):
