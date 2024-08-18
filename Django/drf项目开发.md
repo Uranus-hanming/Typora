@@ -32,8 +32,8 @@
    ```shell
    pip install poetry
    # 初次直接执行
-   poetry install
    pip install lib_tar目录下的.tar.gz
+   poetry install
    ```
 
 7. bk_power\settings\overlays\front.py配置静态文件
@@ -525,6 +525,29 @@ models.Tb1.objects.filter(name='seven').delete() # 删除指定条件的数据
    models.objects.bulk_update(update_data, ['field1', 'field2', 'field3'])
    ```
 
+ 5. 查询或创建：get_or_create()
+
+    > 在 Django 中，`Role.objects.get_or_create()` 是一个用于获取对象或创建对象的方法。这个方法的返回值是一个包含两个元素的元组：
+    >
+    > 1. **对象实例**：如果对象存在，它将是该对象的实例；如果对象不存在，它将是新创建的对象的实例。
+    > 2. **布尔值**：指示对象是否是新创建的。如果对象已经存在，布尔值为 `False`；如果对象是新创建的，布尔值为 `True`。
+
+    ```python
+    from myapp.models import Role
+    
+    # 尝试获取或创建一个 Role 对象
+    role, created = Role.objects.get_or_create(name='Admin')
+    
+    # role 是 Role 对象的实例
+    # 可以在模型类Role中进行自定义 def __str__(self):
+    print(role)  # <Role: Admin>
+    
+    # created 是一个布尔值，表示 Role 对象是否被创建
+    print(created)  # True 如果新创建了对象，否则 False
+    ```
+
+    
+
 ###### 8. 模型关系
 
 1. 一对多关系(ForeignKey)
@@ -1009,14 +1032,18 @@ class ServerViewSet(viewsets.ModelViewSet):
 
 - 根据某个字段联合过滤（or的关系）
 
-  > http://xxx:xx/xxx/?name=name1&name=name2&name=name3
+  > http://xxx:xx/xxx/?name1=name1&name1=name2&name1=name3&name2=name1&name2=name2&value=value1&value=value2
+  >
+  > 相同字段之间是or关系，不同字段之间的过滤条件是and的关系
 
   ```python
   import django_filters
   from django.db.models import Q
   
   class xxxFilter(django_filters.FilterSet):
-      name = django_filters.CharFilter(method="get_name")
+      name1 = django_filters.CharFilter(method="get_name1")
+      name2 = django_filters.CharFilter(method="get_name2")
+      value = django_filters.CharFilter(method="get_value")
   
       def build_or_condition_query(self, field, values, lookup_expr="icontains"):
           """构造 "or" 查询条件，根据一个字段来筛选不同的值"""
@@ -1035,12 +1062,20 @@ class ServerViewSet(viewsets.ModelViewSet):
           combined_q = reduce(or_, q_list)
           return combined_q
   
-      def get_name(self, queryset, name, value):
+      def get_name1(self, queryset, name, value):
           # 从url获取参数列表
-          values = self.request.query_params.getlist('name')
+          values = self.request.query_params.getlist('name1')
           # 过滤条件为A and B，其中A和B里面都为or关系
           # 此处的QuerySet对象的filter()方法，可以构造各种方式的查询条件。
           return queryset.filter(self.build_or_condition_query(name, values) & self.keyword(keyword))
+      
+      def get_name(self, queryset, name, value):
+          values = self.request.query_params.getlist('name2')
+          return queryset.filter(self.build_or_condition_query(name, values))
+      
+      def get_value(self, queryset, name, value):
+          values = self.request.query_params.getlist('value')
+          return queryset.filter(self.build_or_condition_query(name, values))
       
   class xxxViewSet(viewsets.ModelViewSet):
       queryset = xxx.objects.all()
@@ -1213,6 +1248,31 @@ class ServerViewSet(viewsets.ModelViewSet):
    ```
 
 ###### 5. 权限类
+
+1. 视图类中配置
+
+   ```python
+   认证：authentication_classes = []
+   权限：permission_classes = []
+   ```
+
+2. settings.py 默认配置文件
+
+   ```python
+   REST_FRAMEWORK = {
+       # 配置认证方式的选项
+       'DEFAULT_AUTHENTICATION_CLASSES': (
+           'rest_framework.authentication.SessionAuthentication', # session认证
+           'rest_framework.authentication.BasicAuthentication',   # 基本认证
+       ),
+       # 权限配置
+       'DEFAULT_PERMISSION_CLASSES': (
+           'rest_framework.permissions.IsAuthenticated',
+       )
+   }
+   ```
+
+   
 
 1. 权限校验：CheckPermission
 2. IsAuthenticated
