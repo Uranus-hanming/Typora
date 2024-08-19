@@ -844,6 +844,53 @@ print(bingo())
   注解不会做任何处理，只是存储在函数的 __annotations__ 属性
   ```
 
+###### 用户定义的函数的属性
+
+| 名称              | 类型           | 说明                                      |
+| ----------------- | -------------- | ----------------------------------------- |
+| \_\_annotations__ | dict           | 参数和返回值的注解                        |
+| \_\_call__        | method-wrapper | 实现 () 运算符；即可调用对象协议          |
+| \_\_closure__     | tuple          | 函数闭包，即自由变量的绑定（通常是 None） |
+| _\_code__         | code           | 编译成字节码的函数元数据和函数定义体      |
+| _\_defaults__     | tuple          | 形式参数的默认值                          |
+| _\_get__          | method-wrapper | 实现只读描述符协议                        |
+| _\_globals__      | dict           | 函数所在模块中的全局变量                  |
+| _\_kwdefaults__   | dict           | 仅限关键字形式参数的默认值                |
+| _\_name__         | str            | 函数名称                                  |
+| _\_qualname__     | str            | 函数的限定名称，如 Random.choice          |
+
+###### 参数处理机制
+
+> ython 最好的特性之一是提供了极为灵活的参数处理机制。
+
+- 如果不想支持数量不定的定位参数，但是想支持仅限关键字参数，在签名中放一个 *
+
+  ```python
+  >>> def f(a, *, b):
+  ... return a, b
+  ...
+  >>> f(1, b=2)
+  (1, 2)
+  ```
+
+###### 函数注解
+
+> 用于为函数声明中的**参数**和**返回值**附加元数据。
+>
+> 函数声明中的各个参数可以在 : 之后增加注解表达式。
+>
+> ​	如果参数有默认值，注解放在参数名和 = 号之间。
+>
+> ​	如果想注解返回值，在 ) 和函数声明末尾的 : 之间添加 -> 和一个表达式。那个表达式可以是任何类型。注解中最常用的类型是类（如 str 或 int）和字符串（如 'int >0'）
+>
+> 注解不会做任何处理，只是存储在函数的 _\_annotations__ 属性（一个字典）中
+>
+> 注解对 Python 解释器没有任何意义。注解只是**元数据**，可以供 IDE、框架和装饰器等工具使用。
+
+
+
+
+
 ###### 支持函数式编程的包 - operator模块
 
 > 在函数式编程中，经常需要把算术运算符当作函数使用。
@@ -942,8 +989,7 @@ print(bingo())
     Metropolis(name='Tokyo', cc='JP', pop=36.933, coord=LatLong(lat=35.689722, long=139.691667))
     print(metro_areas[0].coord.lat)  # ➍ 深入 metro_areas[0]，获取它的纬度。
     # 35.689722
-
-
+    
     from operator import attrgetter
     
     name_lat = attrgetter('name', 'coord.lat')  # ➎ 定义一个 attrgetter，获取 name 属性和嵌套的 coord.lat 属性。
@@ -954,7 +1000,6 @@ print(bingo())
     ('Delhi NCR', 28.613889)
     ('Tokyo', 35.689722)
     ('New York-Newark', 40.808611)"""
-    ```
 
   - methodcaller
 
