@@ -3941,44 +3941,44 @@ getgeneratorstate(my_coro2)  # ➏ getgeneratorstate 函数指明，处于 GEN_C
   from functools import wraps
   
   
-    def coroutine(func):
-        """装饰器：向前执行到第一个`yield`表达式，预激`func`"""
+  def coroutine(func):
+      """装饰器：向前执行到第一个`yield`表达式，预激`func`"""
   
-        @wraps(func)
-        def primer(*args, **kwargs):  # ➊ 把被装饰的生成器函数替换成这里的 primer 函数；调用 primer 函数时，返回预激后的生成器。
-            gen = func(*args, **kwargs)  # ➋ 调用被装饰的函数，获取生成器对象。
-            next(gen)  # ➌ 预激生成器。
-            return gen  # ➍ 返回生成器。
-      
-        return primer
+      @wraps(func)
+      def primer(*args, **kwargs):  # ➊ 把被装饰的生成器函数替换成这里的 primer 函数；调用 primer 函数时，返回预激后的生成器。
+          gen = func(*args, **kwargs)  # ➋ 调用被装饰的函数，获取生成器对象。
+          next(gen)  # ➌ 预激生成器。
+          return gen  # ➍ 返回生成器。
   
-  
-    @coroutine  # ➎ 把装饰器应用到 averager 函数上。
-    def averager():
-        total = 0.0
-        count = 0
-        average = None
-        while True:  # ➊ 这个无限循环表明，只要调用方不断把值发给这个协程，它就会一直接收值，然后生成结果。仅当调用方在协程上调用 .close() 方法，或者没有对协程的引用而被垃圾回收程序回收时，这个协程才会终止。
-            term = yield average  # ➋ 这里的 yield 表达式用于暂停执行协程，把结果发给调用方；还用于接收调用方后面发给协程的值，恢复无限循环。
-            total += term
-            count += 1
-            average = total / count
+      return primer
   
   
-    coro_avg = averager()  # ➊ 调用 averager() 函数创建一个生成器对象，在 coroutine 装饰器的 primer 函数中已经预激了这个生成器。
+  @coroutine  # ➎ 把装饰器应用到 averager 函数上。
+  def averager():
+      total = 0.0
+      count = 0
+      average = None
+      while True:  # ➊ 这个无限循环表明，只要调用方不断把值发给这个协程，它就会一直接收值，然后生成结果。仅当调用方在协程上调用 .close() 方法，或者没有对协程的引用而被垃圾回收程序回收时，这个协程才会终止。
+          term = yield average  # ➋ 这里的 yield 表达式用于暂停执行协程，把结果发给调用方；还用于接收调用方后面发给协程的值，恢复无限循环。
+          total += term
+          count += 1
+          average = total / count
   
-    from inspect import getgeneratorstate
   
-    print(getgeneratorstate(coro_avg))  # ➋ getgeneratorstate 函数指明，处于 GEN_SUSPENDED 状态，因此这个协程已经准备好，可以接收值了。
+  coro_avg = averager()  # ➊ 调用 averager() 函数创建一个生成器对象，在 coroutine 装饰器的 primer 函数中已经预激了这个生成器。
   
-    'GEN_SUSPENDED'
+  from inspect import getgeneratorstate
   
-    print(coro_avg.send(10))  # ➌ 可以立即开始把值发给 coro_avg——这正是 coroutine 装饰器的目的。
-    # 10.0
-    print(coro_avg.send(30))
-    # 20.0
-    print(coro_avg.send(5))
-    # 15.0
+  print(getgeneratorstate(coro_avg))  # ➋ getgeneratorstate 函数指明，处于 GEN_SUSPENDED 状态，因此这个协程已经准备好，可以接收值了。
+  
+  'GEN_SUSPENDED'
+  
+  print(coro_avg.send(10))  # ➌ 可以立即开始把值发给 coro_avg——这正是 coroutine 装饰器的目的。
+  # 10.0
+  print(coro_avg.send(30))
+  # 20.0
+  print(coro_avg.send(5))
+  # 15.0
   ```
 
 
@@ -4055,6 +4055,7 @@ def demo_exc_handling():
     while True:
         try:
             x = yield
+        # 处理特定的异常 DemoException ，其他类型的异常不做处理。
         except DemoException:  # ➊ 特别处理 DemoException 异常。
             print('*** DemoException handled. Continuing...')
         else:  # ➋ 如果没有异常，那么显示接收到的值。
@@ -4289,7 +4290,7 @@ def main(data):  # ➑ main 函数是客户端代码，用 PEP 380 定义的术�
             group.send(value)  # ⓫ 把各个 value 传给 grouper。传入的值最终到达 averager 函数中term = yield 那一行；grouper 永远不知道传入的值是什么。
         group.send(None)  # 重要！ ⓬ 把 None 传入 grouper，导致当前的 averager 实例终止，也让grouper 继续运行，再创建一个 averager 实例，处理下一组值。
         # print(results) # 如果要调试，去掉注释
-        report(results)
+    report(results)
 
 
 # 输出报告
@@ -4348,13 +4349,145 @@ if __name__ == '__main__':
 
 ### 使用期物处理并发
 
+> 尽管有 GIL，Python 线程仍然适合 I/O 密集型应用：标准库中每个使用 C 语言编写的 I/O 函数都会释放 GIL，因此，当某个线程在等待 I/O 时， Python 调度程序会切换到另一个线程。
+
 - 期物指一种对象，表示异步执行的操作。这个概念的作用很大，是 concurrent.futures 模块和asyncio 包的基础。
 
 - 依序下载的脚本
 
  ```python
+import os
+import time
+import sys
+import requests
 
+POP20_CC = ('CN IN US ID BR PK NG BD RU JP MX PH VN ET EG DE IR TR CD FR').split()
+BASE_URL = 'http://flupy.org/data/flags'
+DEST_DIR = 'D:\project\downloads'
+
+
+def save_flag(img, filename):
+    # 保存下载好的图片到本地
+    path = os.path.join(DEST_DIR, filename)
+    with open(path, 'wb') as fp:
+        fp.write(img)
+
+
+def get_flag(cc):
+    # 发送网络请求，下载图片
+    url = '{}/{cc}/{cc}.gif'.format(BASE_URL, cc=cc.lower())
+    resp = requests.get(url)
+    return resp.content
+
+
+def show(text):
+    # 展示下载到的图片
+    print(text, end=' ')
+    sys.stdout.flush()
+
+
+def download_many():
+    # 按英文字母排序按顺序下载
+    for cc in sorted(POP20_CC):
+        # 发送网络请求，下载图片
+        image = get_flag(cc)
+        # 展示下载到的图片
+        show(cc)
+        # 保存下载好的图片到本地
+        save_flag(image, cc.lower() + '.gif')
+    return len(POP20_CC)
+
+
+# 主入口
+def main():
+    t0 = time.time()  # 开始时间
+    # 下载并保存图片，返回下载数量
+    count = download_many()
+    elapsed = time.time() - t0  # 结束时间
+    msg = '\n{} flags downloaded in {:.2f}s'
+    # 打印信息
+    print(msg.format(count, elapsed))
+
+
+if __name__ == '__main__':
+    main()
  ```
+
+##### 使用async/await下载
+
+```python
+import aiohttp  # 用于异步 HTTP 请求。
+import asyncio  # Python 标准库中的异步 I/O 支持。
+import os
+import time
+import sys
+
+POP20_CC = ('CN IN US ID BR PK NG BD RU JP MX PH VN ET EG DE IR TR CD FR').split()
+BASE_URL = 'http://flupy.org/data/flags'
+DEST_DIR = 'D:\\project\\downloads'  # 使用双反斜杠或原始字符串
+
+
+# 定义异步保存函数
+async def save_flag(img, filename):
+    # 保存下载好的图片到本地
+    path = os.path.join(DEST_DIR, filename)
+    # 以二进制模式打开文件并写入图片数据。
+    with open(path, 'wb') as fp:
+        fp.write(img)
+
+
+async def get_flag(session, cc):
+    # 发送网络请求，下载图片
+    url = f'{BASE_URL}/{cc.lower()}/{cc.lower()}.gif'
+    # async with：确保请求完成后关闭连接。
+    async with session.get(url) as response:
+        # 异步读取响应内容。
+        return await response.read()
+
+
+async def show(text):
+    # 展示下载到的图片
+    print(text, end=' ')
+    # 确保输出立即显示。
+    sys.stdout.flush()
+
+
+async def download_flag(cc, session):
+    # 下载单个图片的协程
+    # 等待异步获取图片
+    image = await get_flag(session, cc)
+    # 等待异步展示国家代码
+    await show(cc)
+    # 等待异步保存图片
+    await save_flag(image, cc.lower() + '.gif')
+
+
+async def download_many():
+    # 使用aiohttp异步下载
+    # 创建一个异步 HTTP 会话。
+    async with aiohttp.ClientSession() as session:  # 异步 HTTP 请求使用 aiohttp 实现。
+        # 创建所有下载任务并并发执行它们
+        tasks = [download_flag(cc, session) for cc in sorted(POP20_CC)]
+        await asyncio.gather(*tasks)  # 并发地执行所有下载任务
+    return len(POP20_CC)
+
+
+# 主入口
+def main():
+    t0 = time.time()  # 开始时间
+    # 下载并保存图片，返回下载数量
+    # 运行异步函数 download_many 并等待完成
+    count = asyncio.run(download_many())
+    elapsed = time.time() - t0  # 结束时间
+    msg = '\n{} flags downloaded in {:.2f}s'
+    # 打印信息
+    print(msg.format(count, elapsed))
+
+
+if __name__ == '__main__':
+    main()
+```
+
 
 
 ##### 使用concurrent.futures模块下载
@@ -4398,6 +4531,31 @@ def download_one(cc):  # ➌ 下载一个图像的函数；这是在各个线程
     show(cc)
     save_flag(image, cc.lower() + '.gif')
     return cc
+
+
+# import collections, tqdm
+# def download_many(cc_list, base_url, verbose, max_req):
+#     counter = collections.Counter()  # ➊ 这个 Counter 实例用于统计不同的下载状态：HTTPStatus.ok、HTTPStatus.not_found 或HTTPStatus.error。
+#     cc_iter = sorted(cc_list)  # ➋ 按字母顺序传入的国家代码列表，保存在 cc_iter 变量中。
+#     if not verbose:
+#         cc_iter = tqdm.tqdm(cc_iter)  # ➌ 如果不是详细模式，把 cc_iter 传给 tqdm 函数，返回一个迭代器，产出 cc_iter 中的元素，还会显示进度条动画。
+#     for cc in cc_iter:  # ➍ 这个 for 循环迭代 cc_iter……
+#         try:
+#             res = download_one(cc, base_url, verbose)  # ➎ ……不断调用 download_one 函数，执行下载。
+#         except requests.exceptions.HTTPError as exc:  # ➏ 处理 get_flag 函数抛出的与 HTTP 有关的且 download_one 函数没有处理的异常。
+#             error_msg = 'HTTP error {res.status_code} - {res.reason}'
+#             error_msg = error_msg.format(res=exc.response)
+#         except requests.exceptions.ConnectionError as exc:  # ➐ 处理其他与网络有关的异常。其他异常会中止这个脚本，因为调用download_many 函数的 flags2_common.main 函数中没有try/except 块。
+#             error_msg = 'Connection error'
+#         else:  # ➑ 如果没有异常从 download_one 函数中逃出，从 download_one 函数返回的 namedtuple（HTTPStatus）中获取 status。
+#             error_msg = ''
+#             status = res.status
+#         if error_msg:
+#             status = HTTPStatus.error  # ➒ 如果有错误，把局部变量 status 设为相应的状态。
+#         counter[status] += 1  # ➓ 以 HTTPStatus（一个 Enum）中的值为键，增加计数器。
+#         if verbose and error_msg:  # ⓫ 如果是详细模式，而且有错误，显示带有当前国家代码的错误消息。
+#             print('*** Error for {}: {}'.format(cc, error_msg))
+#     return counter  # ⓬ 返回 counter，以便 main 函数能在最终的报告中显示数量。
 
 
 def download_many(cc_list):
@@ -4521,6 +4679,21 @@ main()
 # [15:56:55] result 4: 40
 ```
 
+##### 实现下载进度
+
+```python
+pip install tqdm
+
+import time
+from tqdm import tqdm
+for i in tqdm(range(1000)):
+    time.sleep(.01)
+```
+
+
+
+
+
 ### 使用 asyncio 包处理并发
 
 ##### 通过线程以动画形式显示文本式旋转指针
@@ -4640,3 +4813,102 @@ if __name__ == '__main__':
 - 在线程版 supervisor 函数中，slow_function 函数是普通的函数，直接由线程调用。在异步版 supervisor 函数中，slow_function 函数是协程，由 yield from 驱动。
 - 没有 API 能从外部终止线程，因为线程随时可能被中断，导致系统处于无效状态。如果想终止任务，可以使用 Task.cancel() 实例方法，在协程内部抛出 CancelledError 异常。协程可以在暂停的yield 处捕获这个异常，处理终止请求。
 - supervisor 协程必须在 main 函数中由loop.run_until_complete 方法执行。
+
+##### 使用asyncio和aiohttp包下载
+
+- (1) 首先，在 download_many 函数中获取一个事件循环，处理调用
+  download_one 函数生成的几个协程对象。
+- (2) asyncio 事件循环依次激活各个协程。
+- (3) 客户代码中的协程（如 get_flag）使用 yield from 把职责委托给
+  库里的协程（如 aiohttp.request）时，控制权交还事件循环，执行
+  之前排定的协程。
+- (4) 事件循环通过基于回调的低层 API，在阻塞的操作执行完毕后获得
+  通知。
+- (5) 获得通知后，主循环把结果发给暂停的协程。
+- (6) 协程向前执行到下一个 yield from 表达式，例如 get_flag 函数
+  中的 yield from resp.read()。事件循环再次得到控制权，重复第
+  4~6 步，直到事件循环终止。
+
+> yield from foo 句法能防止阻塞，是因为当前协程（即包含 yieldfrom 代码的委派生成器）暂停后，控制权回到事件循环手中，再去驱动其他协程；foo 期物或协程运行完毕后，把结果返回给暂停的协程，将其恢复。
+
+- 我们编写的协程链条始终通过把最外层委派生成器传给 asyncio包 API 中的某个函数（如 loop.run_until_complete(...)）驱动。也就是说，使用 asyncio 包时，我们编写的代码不通过调用next(...) 函数或 .send(...) 方法驱动协程——这一点由asyncio 包实现的事件循环去做。
+- 我们编写的协程链条最终通过 yield from 把职责委托给 asyncio包中的某个协程函数或协程方法（例如示例 18-2 中的 yield fromasyncio.sleep(...)），或者其他库中实现高层协议的协程（例如示例 18-5 中 get_flag 协程里的 resp = yield fromaiohttp. request('GET', url)）。
+- 也就是说，最内层的子生成器是库中真正执行 I/O 操作的函数，而不是我们自己编写的函数。
+
+> 概括起来就是：使用 asyncio 包时，我们编写的异步代码中包含由asyncio 本身驱动的协程（即委派生成器），而生成器最终把职责委托给 asyncio 包或第三方库（如 aiohttp）中的协程。这种处理方式相当于架起了管道，让 asyncio 事件循环（通过我们编写的协程）驱动执行低层异步 I/O 操作的库函数。
+
+```python
+import os
+import time
+import sys
+import asyncio
+import aiohttp
+
+BASE_URL = 'http://flupy.org/data/flags'
+DEST_DIR = 'D:\project\downloads'
+POP20_CC = ('CN IN US ID BR PK NG BD RU JP MX PH VN ET EG DE IR TR CD FR').split()
+
+
+def save_flag(img, filename):
+    # 保存下载好的图片到本地
+    path = os.path.join(DEST_DIR, filename)
+    with open(path, 'wb') as fp:
+        fp.write(img)
+
+
+def show(text):
+    # 展示下载到的图片
+    print(text, end=' ')
+    sys.stdout.flush()
+
+
+@asyncio.coroutine  # ➌ 协程应该使用 @asyncio.coroutine 装饰。
+def get_flag(cc):
+    url = '{}/{cc}/{cc}.gif'.format(BASE_URL, cc=cc.lower())
+    resp = yield from aiohttp.request('GET', url)  # ➍ 阻塞的操作通过协程实现，客户代码通过 yield from 把职责委托给协程，以便异步运行协程。
+    image = yield from resp.read()  # ➎ 读取响应内容是一项单独的异步操作。
+    return image
+
+
+@asyncio.coroutine
+def download_one(cc):  # ➏ download_one 函数也必须是协程，因为用到了 yield from。
+    image = yield from get_flag(cc)  # ➐ 与依序下载版 download_one 函数唯一的区别是这一行中的 yieldfrom；函数定义体中的其他代码与之前完全一样。
+    show(cc)
+    save_flag(image, cc.lower() + '.gif')
+    return cc
+
+
+def download_many(cc_list):
+    loop = asyncio.get_event_loop()  # ➑ 获取事件循环底层实现的引用。
+    to_do = [download_one(cc) for cc in sorted(cc_list)]  # ➒ 调用 download_one 函数获取各个国旗，然后构建一个生成器对象列表。
+    wait_coro = asyncio.wait(to_do)  # ➓ 虽然函数的名称是 wait，但它不是阻塞型函数。wait 是一个协程，等传给它的所有协程运行完毕后结束
+    res, _ = loop.run_until_complete(wait_coro)  # ⓫ 执行事件循环，直到 wait_coro 运行结束；事件循环运行的过程中，这个脚本会在这里阻塞。
+    loop.close()  # ⓬ 关闭事件循环。
+    return len(res)
+
+
+def main(download_many):
+    t0 = time.time()
+    count = download_many(POP20_CC)
+    elapsed = time.time() - t0
+    msg = '\n{} flags downloaded in {:.2f}s'
+    print(msg.format(count, elapsed))
+
+
+if __name__ == '__main__':
+    main(download_many)
+```
+
+##### yield from 的用法
+
+- 使用 yield from 链接的多个协程最终必须由不是协程的调用方驱动，调用方显式或隐式（例如，在 for 循环中）在最外层委派生成器上调用 next(...) 函数或 .send(...) 方法。
+- 链条中最内层的子生成器必须是简单的生成器（只使用 yield）或可迭代的对象。
+
+
+
+
+
+
+
+
+
