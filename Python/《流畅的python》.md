@@ -844,6 +844,53 @@ print(bingo())
   注解不会做任何处理，只是存储在函数的 __annotations__ 属性
   ```
 
+###### 用户定义的函数的属性
+
+| 名称              | 类型           | 说明                                      |
+| ----------------- | -------------- | ----------------------------------------- |
+| \_\_annotations__ | dict           | 参数和返回值的注解                        |
+| \_\_call__        | method-wrapper | 实现 () 运算符；即可调用对象协议          |
+| \_\_closure__     | tuple          | 函数闭包，即自由变量的绑定（通常是 None） |
+| _\_code__         | code           | 编译成字节码的函数元数据和函数定义体      |
+| _\_defaults__     | tuple          | 形式参数的默认值                          |
+| _\_get__          | method-wrapper | 实现只读描述符协议                        |
+| _\_globals__      | dict           | 函数所在模块中的全局变量                  |
+| _\_kwdefaults__   | dict           | 仅限关键字形式参数的默认值                |
+| _\_name__         | str            | 函数名称                                  |
+| _\_qualname__     | str            | 函数的限定名称，如 Random.choice          |
+
+###### 参数处理机制
+
+> ython 最好的特性之一是提供了极为灵活的参数处理机制。
+
+- 如果不想支持数量不定的定位参数，但是想支持仅限关键字参数，在签名中放一个 *
+
+  ```python
+  >>> def f(a, *, b):
+  ... return a, b
+  ...
+  >>> f(1, b=2)
+  (1, 2)
+  ```
+
+###### 函数注解
+
+> 用于为函数声明中的**参数**和**返回值**附加元数据。
+>
+> 函数声明中的各个参数可以在 : 之后增加注解表达式。
+>
+> ​	如果参数有默认值，注解放在参数名和 = 号之间。
+>
+> ​	如果想注解返回值，在 ) 和函数声明末尾的 : 之间添加 -> 和一个表达式。那个表达式可以是任何类型。注解中最常用的类型是类（如 str 或 int）和字符串（如 'int >0'）
+>
+> 注解不会做任何处理，只是存储在函数的 _\_annotations__ 属性（一个字典）中
+>
+> 注解对 Python 解释器没有任何意义。注解只是**元数据**，可以供 IDE、框架和装饰器等工具使用。
+
+
+
+
+
 ###### 支持函数式编程的包 - operator模块
 
 > 在函数式编程中，经常需要把算术运算符当作函数使用。
@@ -942,8 +989,7 @@ print(bingo())
     Metropolis(name='Tokyo', cc='JP', pop=36.933, coord=LatLong(lat=35.689722, long=139.691667))
     print(metro_areas[0].coord.lat)  # ➍ 深入 metro_areas[0]，获取它的纬度。
     # 35.689722
-
-
+    
     from operator import attrgetter
     
     name_lat = attrgetter('name', 'coord.lat')  # ➎ 定义一个 attrgetter，获取 name 属性和嵌套的 coord.lat 属性。
@@ -954,7 +1000,6 @@ print(bingo())
     ('Delhi NCR', 28.613889)
     ('Tokyo', 35.689722)
     ('New York-Newark', 40.808611)"""
-    ```
 
   - methodcaller
 
@@ -1109,7 +1154,7 @@ print(bingo())
 
 ##### 闭包
 
-> 闭包指延伸了作用域的函数，其中包含函数定义体中引用、但是不在定义体中定义的非全局变量。函数是不是匿名的没有关系，关键是它能访问定义体之外定义的非全局变量。
+> 闭包指延伸了作用域的函数，其中包含函数定义体中引用、但是不在定义体中定义的非全局变量。函数是不是匿名的没有关系，关键是它**能访问定义体之外定义的非全局变量**。
 >
 > 闭包是一种函数，它会保留定义函数时存在的自由变量的绑定，这样调用函数时，虽然定义作用域不可用了，但是仍能使用那些绑定。只有嵌套在其他函数中的函数才可能需要处理不在全局作用域中的外部变量。
 >
@@ -1394,8 +1439,8 @@ factorial = clock(factorial)
     # 在每次调用被装饰的函数时计时，然后把经过的时间、传入的参数和调用的结果打印出来。
     import time
     import functools
-
-
+    
+    
     def clock(func):
         @functools.wraps(func)
         def clocked(*args, **kwargs):
@@ -1414,18 +1459,18 @@ factorial = clock(factorial)
             return result
     
         return clocked
-
-
+    
+    
     @clock
     def snooze(seconds):
         time.sleep(seconds)
-
-
+    
+    
     @clock
     def factorial(n):
         return 1 if n < 2 else n * factorial(n - 1)
-
-
+    
+    
     if __name__ == '__main__':
         print('*' * 40, 'Calling snooze(.123)')
         snooze(.123)
@@ -1643,6 +1688,7 @@ running register(active=False)->decorate(<function f2 at 0x10073c268>)
     
     DEFAULT_FMT = '[{elapsed:0.8f}s] {name}({args}) -> {result}'
   
+<<<<<<< HEAD
   
     def clock(fmt=DEFAULT_FMT):  # ➊ clock 是参数化装饰器工厂函数。
         def decorate(func):  # ➋ decorate 是真正的装饰器。
@@ -1674,6 +1720,41 @@ running register(active=False)->decorate(<function f2 at 0x10073c268>)
     [0.12411904s] snooze(0.123) -> None
     [0.12410498s] snooze(0.123) -> None
     """
+=======
+  DEFAULT_FMT = '[{elapsed:0.8f}s] {name}({args}) -> {result}'
+  
+  
+  def clock(fmt=DEFAULT_FMT):  # ➊ clock 是参数化装饰器工厂函数。
+    def decorate(func):  # ➋ decorate 是真正的装饰器。
+        def clocked(*_args):  # ➌ clocked 包装被装饰的函数。
+            t0 = time.time()
+            _result = func(*_args)  # ➍ _result 是被装饰的函数返回的真正结果。
+            elapsed = time.time() - t0
+            name = func.__name__
+            args = ', '.join(repr(arg) for arg in _args)  # ➎ _args 是 clocked 的参数，args 是用于显示的字符串。
+            result = repr(_result)  # ➏ result 是 _result 的字符串表示形式，用于显示。
+            print(fmt.format(**locals()))  # ➐ 这里使用 **locals() 是为了在 fmt 中引用 clocked 的局部变量。
+            return _result  # ➑ clocked 会取代被装饰的函数，因此它应该返回被装饰的函数返回的值。
+        return clocked  # ➒ decorate 返回 clocked。
+    return decorate  # ➓ clock 返回 decorate。
+  
+  
+  if __name__ == '__main__':
+    @clock()
+    # @clock('{name}: {elapsed}s')
+    # @clock('{name}({args}) dt={elapsed:0.3f}s')
+    def snooze0(seconds):
+        time.sleep(seconds)
+  
+  
+    for i in range(3):
+        snooze0(.123)
+  """
+  [0.12412500s] snooze(0.123) -> None
+  [0.12411904s] snooze(0.123) -> None
+  [0.12410498s] snooze(0.123) -> None
+  """
+>>>>>>> cdf8735cfa099ddef2387bb4e8f2c9ab3bee29a4
   ```
 
 
@@ -1790,7 +1871,8 @@ class TwilightBus:
 
 ```
 
-- 每个对象都会统计有多少引用指向自己。当引用计数归零时，对象立即就被销毁：CPython 会在对象上调用 \__del__ 方法（如果定义了），然后释放分配给对象的内存。
+- 每个对象都会统计有多少引用指向自己。当**引用计数**归零时，对象立即就被销毁：CPython 会在对象上调用 \__del__ 方法（如果定义了），然后释放分配给对象的内存。
+- **分代垃圾回收算法**，用于检测引用循环中涉及的对象组——如果一组对象之间全是相互引用，即使再出色的引用方式也会导致组中的对象不可获取。
 - 正是因为有引用，对象才会在内存中存在。当对象的引用数量归零后，垃圾回收程序会把对象销毁。但是，有时需要引用对象，而不让对象存在的时间超过所需时间。这经常用在缓存中。
 - 弱引用不会增加对象的引用数量。引用的目标对象称为所指对象（referent）。因此我们说，弱引用不会妨碍所指对象被当作垃圾回收。
 
@@ -1863,6 +1945,10 @@ class TwilightBus:
     # ['Brie', 'Parmesan', 'Red Leicester', 'Tilsit'] ➌ stock 是完整的。
     del catalog
     print(sorted(stock.keys()))
+<<<<<<< HEAD
+=======
+  
+>>>>>>> cdf8735cfa099ddef2387bb4e8f2c9ab3bee29a4
     # ['Parmesan'] ➍ 删除 catalog 之后，stock 中的大多数奶酪都不见了，这是WeakValueDictionary 的预期行为。为什么不是全部呢？
     del cheese
     print(sorted(stock.keys()))
@@ -1891,8 +1977,7 @@ class Vector2d:
         self.y = float(y)
 
     def __iter__(self):
-        return (i for i in (self.x,
-                            self.y))  # ➌ 定义 __iter__ 方法，把 Vector2d 实例变成可迭代的对象，这样才能拆包（例如，x, y = my_vector）。这个方法的实现方式很简单，直接调用生成器表达式一个接一个产出分量。
+        return (i for i in (self.x, self.y))  # ➌ 定义 __iter__ 方法，把 Vector2d 实例变成可迭代的对象，这样才能拆包（例如，x, y = my_vector）。这个方法的实现方式很简单，直接调用生成器表达式一个接一个产出分量。
 
     def __repr__(self):
         # 如果硬编码 class_name 的值，那么 Vector2d 的子类（如ShortVector2d）要覆盖 __repr__ 方法，只是为了修改 class_name的值。从实例的类型中读取类名，__repr__ 方法就可以放心继承。
@@ -1976,7 +2061,7 @@ print(format(Vector2d(1, 1), '0.5fp'))
 
 ##### classmethod与staticmethod
 
-- 定义操作类，而不是操作实例的方法。classmethod 改变了调用方法的方式，因此类方法的第一个参数是类本身，而不是实例。
+- 定义操作类，而不是操作实例的方法。classmethod 改变了调用方法的方式，因此类方法的第一个参数是**类本身**，而不是实例。
 - classmethod 最常见的用途是定义备选构造方法
 - staticmethod 装饰器也会改变方法的调用方式，但是第一个参数不是特殊的值。其实，静态方法就是普通的函数，只是碰巧在类的定义体中，而不是在模块层定义。
 
@@ -2343,10 +2428,13 @@ from random import random
 
 
 class Tombola(abc.ABC):  # ➊ 自己定义的抽象基类要继承 abc.ABC。
+    # 会去检查继承该类的子类是否实现了该方法，没有则会抛出TypeError错误
+    # 在 @abstractmethod 和 def 语句之间不能有其他装饰器。
     @abc.abstractmethod
     def load(self, iterable):  # ➋ 抽象方法使用 @abstractmethod 装饰器标记，而且定义体中通常只有文档字符串。
         """从可迭代对象中添加元素。"""
 
+    @classmethod  # 可以堆叠装饰器
     @abc.abstractmethod
     def pick(self):  # ➌ 根据文档字符串，如果没有元素可选，应该抛出 LookupError。
         """随机删除元素，然后将其返回。
@@ -2694,7 +2782,7 @@ print_mro(io.TextIOWrapper)
 
 - 迭代器 iterator
 
-  > 迭代器是这样的对象：实现了无参数的 \__next__ 方法，返回序列中的下一个元素；如果没有元素了，那么抛出 StopIteration 异常。Python 中的迭代器还实现了 \__iter__ 方法，因此迭代器也可以迭代。
+  > 迭代器是这样的对象：实现了无参数的 \_\_next__ 方法，返回序列中的下一个元素；如果没有元素了，那么抛出 StopIteration 异常。Python 中的迭代器还实现了 \_\_iter__ 方法，因此迭代器也可以迭代。
   >
   > 实现了无参数的 \_\_next\_\_ 方法，返回序列中的下一个元素；如果没有元素了，那么抛出 StopIteration 异常。Python 中的迭代器还实现了 \_\_iter\_\_ 方法，因此迭代器也可以迭代。
 
@@ -2852,44 +2940,62 @@ print(s[0])
   import re
   import reprlib
   
-    RE_WORD = re.compile('\w+')
-
-
-    class Sentence:
-        def __init__(self, text):
-            self.text = text
-            self.words = RE_WORD.findall(text)  # ➊ re.findall 函数返回一个字符串列表，里面的元素是正则表达式的全部非重叠匹配。
-    
-        def __getitem__(self, index):
-            return self.words[index]  # ➋ self.words 中保存的是 .findall 函数返回的结果，因此直接返回指定索引位上的单词。
-    
-        def __len__(self):  # ➌ 为了完善序列协议，我们实现了 __len__ 方法；不过，为了让对象可以迭代，没必要实现这个方法。
-            return len(self.words)
-    
-        def __repr__(self):
-            return 'Sentence(%s)' % reprlib.repr(self.text)  # ➍ reprlib.repr 这个实用函数用于生成大型数据结构的简略字符串表示形式。
-    
-    s3 = Sentence('Pig and Pepper')  # ➊
-    it = iter(s3)  # ➋
-    print(it)  # doctest: +ELLIPSIS
-    # <iterator object at 0x...>
-    print(next(it))  # ➌
-    'Pig'
-    print(next(it))
-    'and'
-    print(next(it))
-    'Pepper'
-    # print(next(it))  # ➍
-    # Traceback (most recent call last):
-    # ...
-    # StopIteration
-    print(list(it))  # ➎
-    # []
-    print(list(iter(s3)))  # ➏
-    # ['Pig', 'and', 'Pepper']
+  RE_WORD = re.compile('\w+')
+  
+  
+  class Sentence:
+      def __init__(self, text):
+          self.text = text
+          self.words = RE_WORD.findall(text)  # ➊ re.findall 函数返回一个字符串列表，里面的元素是正则表达式的全部非重叠匹配。
+  
+      def __getitem__(self, index):
+          return self.words[index]  # ➋ self.words 中保存的是 .findall 函数返回的结果，因此直接返回指定索引位上的单词。
+  
+      def __len__(self):  # ➌ 为了完善序列协议，我们实现了 __len__ 方法；不过，为了让对象可以迭代，没必要实现这个方法。
+          return len(self.words)
+  
+      def __repr__(self):
+          return 'Sentence(%s)' % reprlib.repr(self.text)  # ➍ reprlib.repr 这个实用函数用于生成大型数据结构的简略字符串表示形式。
+  
+  s3 = Sentence('Pig and Pepper')  # ➊
+  it = iter(s3)  # ➋
+  print(it)  # doctest: +ELLIPSIS
+  # <iterator object at 0x...>
+  print(next(it))  # ➌
+  'Pig'
+  print(next(it))
+  'and'
+  print(next(it))
+  'Pepper'
+  # print(next(it))  # ➍
+  # Traceback (most recent call last):
+  # ...
+  # StopIteration
+  print(list(it))  # ➎
+  # []
+  print(list(iter(s3)))  # ➏
+  # ['Pig', 'and', 'Pepper']
   ```
 
 ##### Sentence类第2版：典型的迭代器
+
+> 可迭代的对象有个 _\_iter__ 方法，每次都实例化一个新的迭代器；而迭代器要实现 _\_next__ 方法，返回单个元素，此外还要实现\_\_iter__ 方法，返回迭代器本身。
+>
+> 因此，迭代器可以迭代，但是可迭代的对象不是迭代器。
+
+- 迭代器模式可用来：
+
+  > 为了“支持多种遍历”，必须能从同一个可迭代的实例中获取多个独立的迭代器，而且各个迭代器要能维护自身的内部状态，因此这一模式正确的实现方式是，每次调用 iter(my_iterable) 都新建一个独立的迭代器。这就是为什么这个示例需要定义 SentenceIterator 类。
+  >
+  > 可迭代的对象一定不能是自身的迭代器。也就是说，可迭代的对象必须实现 _\_iter__ 方法，但不能实现 _\_next__ 方法。
+  >
+  > 另一方面，迭代器应该一直可以迭代。迭代器的 _\_iter__ 方法应该返回自身。
+
+  - 访问一个聚合对象的内容而无需暴露它的内部表示
+
+  - 支持对聚合对象的多种遍历
+
+  - 为遍历不同的聚合结构提供一个统一的接口（即支持多态迭代）
 
 ```python
 import abc
@@ -2926,9 +3032,11 @@ class SentenceIterator:
 
     def __iter__(self):  # ➒ 实现 self.__iter__ 方法。
         return self
-  ```
+```
 
 ##### Sentence类第3版：生成器函数
+
+> 迭代器其实是生成器对象，每次调用 _\_iter__ 方法都会自动创建，因为这里的 _\_iter__ 方法是生成器函数。
 
 - \__iter__ 方法是生成器函数，调用时会构建一个实现了迭代器接口的生成器对象，因此不用再定义 SentenceIterator 类了。
 
@@ -3688,7 +3796,11 @@ print(monster)
 - 使用生成器实现的上下文管理器
 
   ```python
+<<<<<<< HEAD
     import contextlib
+=======
+  import contextlib
+>>>>>>> cdf8735cfa099ddef2387bb4e8f2c9ab3bee29a4
   
   
     @contextlib.contextmanager  # ➊ 应用 contextmanager 装饰器。
@@ -3872,6 +3984,7 @@ getgeneratorstate(my_coro2)  # ➏ getgeneratorstate 函数指明，处于 GEN_C
   from functools import wraps
   
   
+<<<<<<< HEAD
     def coroutine(func):
         """装饰器：向前执行到第一个`yield`表达式，预激`func`"""
   
@@ -3910,6 +4023,46 @@ getgeneratorstate(my_coro2)  # ➏ getgeneratorstate 函数指明，处于 GEN_C
     # 20.0
     print(coro_avg.send(5))
     # 15.0
+=======
+  def coroutine(func):
+      """装饰器：向前执行到第一个`yield`表达式，预激`func`"""
+  
+      @wraps(func)
+      def primer(*args, **kwargs):  # ➊ 把被装饰的生成器函数替换成这里的 primer 函数；调用 primer 函数时，返回预激后的生成器。
+          gen = func(*args, **kwargs)  # ➋ 调用被装饰的函数，获取生成器对象。
+          next(gen)  # ➌ 预激生成器。
+          return gen  # ➍ 返回生成器。
+  
+      return primer
+  
+  
+  @coroutine  # ➎ 把装饰器应用到 averager 函数上。
+  def averager():
+      total = 0.0
+      count = 0
+      average = None
+      while True:  # ➊ 这个无限循环表明，只要调用方不断把值发给这个协程，它就会一直接收值，然后生成结果。仅当调用方在协程上调用 .close() 方法，或者没有对协程的引用而被垃圾回收程序回收时，这个协程才会终止。
+          term = yield average  # ➋ 这里的 yield 表达式用于暂停执行协程，把结果发给调用方；还用于接收调用方后面发给协程的值，恢复无限循环。
+          total += term
+          count += 1
+          average = total / count
+  
+  
+  coro_avg = averager()  # ➊ 调用 averager() 函数创建一个生成器对象，在 coroutine 装饰器的 primer 函数中已经预激了这个生成器。
+  
+  from inspect import getgeneratorstate
+  
+  print(getgeneratorstate(coro_avg))  # ➋ getgeneratorstate 函数指明，处于 GEN_SUSPENDED 状态，因此这个协程已经准备好，可以接收值了。
+  
+  'GEN_SUSPENDED'
+  
+  print(coro_avg.send(10))  # ➌ 可以立即开始把值发给 coro_avg——这正是 coroutine 装饰器的目的。
+  # 10.0
+  print(coro_avg.send(30))
+  # 20.0
+  print(coro_avg.send(5))
+  # 15.0
+>>>>>>> cdf8735cfa099ddef2387bb4e8f2c9ab3bee29a4
   ```
 
 
@@ -3986,6 +4139,7 @@ def demo_exc_handling():
     while True:
         try:
             x = yield
+        # 处理特定的异常 DemoException ，其他类型的异常不做处理。
         except DemoException:  # ➊ 特别处理 DemoException 异常。
             print('*** DemoException handled. Continuing...')
         else:  # ➋ 如果没有异常，那么显示接收到的值。
@@ -4129,6 +4283,7 @@ print(coro_avg.send(None))  # ➋
 
   > yield from x 表达式对 x 对象所做的第一件事是，调用 iter(x)，从中获取迭代器。因此，x 可以是任何可迭代的对象。
 
+<<<<<<< HEAD
   ```python
   def gen():
         for c in 'AB':
@@ -4160,6 +4315,41 @@ print(coro_avg.send(None))  # ➋
     print(list(chain(s, t)))
     # ['A', 'B', 'C', 0, 1, 2]
   ```
+=======
+```python
+def gen():
+  for c in 'AB':
+      yield c
+  for i in range(1, 3):
+      yield i
+
+
+print(list(gen()))
+
+
+# ['A', 'B', 1, 2]
+
+def gen_for():
+  yield from 'AB'
+  yield from range(1, 3)
+
+
+print(list(gen_for()))
+# ['A', 'B', 1, 2]
+
+def chain(*iterables):
+  for it in iterables:
+  yield from it
+
+  s = 'ABC'
+  t = tuple(range(3))
+  print(list(chain(s, t)))
+  # ['A', 'B', 'C', 0, 1, 2]
+```
+
+>>>>>>> cdf8735cfa099ddef2387bb4e8f2c9ab3bee29a4
+
+
 
 - 委派生成器
 
@@ -4218,7 +4408,7 @@ def main(data):  # ➑ main 函数是客户端代码，用 PEP 380 定义的术�
             group.send(value)  # ⓫ 把各个 value 传给 grouper。传入的值最终到达 averager 函数中term = yield 那一行；grouper 永远不知道传入的值是什么。
         group.send(None)  # 重要！ ⓬ 把 None 传入 grouper，导致当前的 averager 实例终止，也让grouper 继续运行，再创建一个 averager 实例，处理下一组值。
         # print(results) # 如果要调试，去掉注释
-        report(results)
+    report(results)
 
 
 # 输出报告
@@ -4277,13 +4467,145 @@ if __name__ == '__main__':
 
 ### 使用期物处理并发
 
+> 尽管有 GIL，Python 线程仍然适合 I/O 密集型应用：标准库中每个使用 C 语言编写的 I/O 函数都会释放 GIL，因此，当某个线程在等待 I/O 时， Python 调度程序会切换到另一个线程。
+
 - 期物指一种对象，表示异步执行的操作。这个概念的作用很大，是 concurrent.futures 模块和asyncio 包的基础。
 
 - 依序下载的脚本
 
  ```python
+import os
+import time
+import sys
+import requests
 
+POP20_CC = ('CN IN US ID BR PK NG BD RU JP MX PH VN ET EG DE IR TR CD FR').split()
+BASE_URL = 'http://flupy.org/data/flags'
+DEST_DIR = 'D:\project\downloads'
+
+
+def save_flag(img, filename):
+    # 保存下载好的图片到本地
+    path = os.path.join(DEST_DIR, filename)
+    with open(path, 'wb') as fp:
+        fp.write(img)
+
+
+def get_flag(cc):
+    # 发送网络请求，下载图片
+    url = '{}/{cc}/{cc}.gif'.format(BASE_URL, cc=cc.lower())
+    resp = requests.get(url)
+    return resp.content
+
+
+def show(text):
+    # 展示下载到的图片
+    print(text, end=' ')
+    sys.stdout.flush()
+
+
+def download_many():
+    # 按英文字母排序按顺序下载
+    for cc in sorted(POP20_CC):
+        # 发送网络请求，下载图片
+        image = get_flag(cc)
+        # 展示下载到的图片
+        show(cc)
+        # 保存下载好的图片到本地
+        save_flag(image, cc.lower() + '.gif')
+    return len(POP20_CC)
+
+
+# 主入口
+def main():
+    t0 = time.time()  # 开始时间
+    # 下载并保存图片，返回下载数量
+    count = download_many()
+    elapsed = time.time() - t0  # 结束时间
+    msg = '\n{} flags downloaded in {:.2f}s'
+    # 打印信息
+    print(msg.format(count, elapsed))
+
+
+if __name__ == '__main__':
+    main()
  ```
+
+##### 使用async/await下载
+
+```python
+import aiohttp  # 用于异步 HTTP 请求。
+import asyncio  # Python 标准库中的异步 I/O 支持。
+import os
+import time
+import sys
+
+POP20_CC = ('CN IN US ID BR PK NG BD RU JP MX PH VN ET EG DE IR TR CD FR').split()
+BASE_URL = 'http://flupy.org/data/flags'
+DEST_DIR = 'D:\\project\\downloads'  # 使用双反斜杠或原始字符串
+
+
+# 定义异步保存函数
+async def save_flag(img, filename):
+    # 保存下载好的图片到本地
+    path = os.path.join(DEST_DIR, filename)
+    # 以二进制模式打开文件并写入图片数据。
+    with open(path, 'wb') as fp:
+        fp.write(img)
+
+
+async def get_flag(session, cc):
+    # 发送网络请求，下载图片
+    url = f'{BASE_URL}/{cc.lower()}/{cc.lower()}.gif'
+    # async with：确保请求完成后关闭连接。
+    async with session.get(url) as response:
+        # 异步读取响应内容。
+        return await response.read()
+
+
+async def show(text):
+    # 展示下载到的图片
+    print(text, end=' ')
+    # 确保输出立即显示。
+    sys.stdout.flush()
+
+
+async def download_flag(cc, session):
+    # 下载单个图片的协程
+    # 等待异步获取图片
+    image = await get_flag(session, cc)
+    # 等待异步展示国家代码
+    await show(cc)
+    # 等待异步保存图片
+    await save_flag(image, cc.lower() + '.gif')
+
+
+async def download_many():
+    # 使用aiohttp异步下载
+    # 创建一个异步 HTTP 会话。
+    async with aiohttp.ClientSession() as session:  # 异步 HTTP 请求使用 aiohttp 实现。
+        # 创建所有下载任务并并发执行它们
+        tasks = [download_flag(cc, session) for cc in sorted(POP20_CC)]
+        await asyncio.gather(*tasks)  # 并发地执行所有下载任务
+    return len(POP20_CC)
+
+
+# 主入口
+def main():
+    t0 = time.time()  # 开始时间
+    # 下载并保存图片，返回下载数量
+    # 运行异步函数 download_many 并等待完成
+    count = asyncio.run(download_many())
+    elapsed = time.time() - t0  # 结束时间
+    msg = '\n{} flags downloaded in {:.2f}s'
+    # 打印信息
+    print(msg.format(count, elapsed))
+
+
+if __name__ == '__main__':
+    main()
+```
+
 
 
 ##### 使用concurrent.futures模块下载
@@ -4327,6 +4649,31 @@ def download_one(cc):  # ➌ 下载一个图像的函数；这是在各个线程
     show(cc)
     save_flag(image, cc.lower() + '.gif')
     return cc
+
+
+# import collections, tqdm
+# def download_many(cc_list, base_url, verbose, max_req):
+#     counter = collections.Counter()  # ➊ 这个 Counter 实例用于统计不同的下载状态：HTTPStatus.ok、HTTPStatus.not_found 或HTTPStatus.error。
+#     cc_iter = sorted(cc_list)  # ➋ 按字母顺序传入的国家代码列表，保存在 cc_iter 变量中。
+#     if not verbose:
+#         cc_iter = tqdm.tqdm(cc_iter)  # ➌ 如果不是详细模式，把 cc_iter 传给 tqdm 函数，返回一个迭代器，产出 cc_iter 中的元素，还会显示进度条动画。
+#     for cc in cc_iter:  # ➍ 这个 for 循环迭代 cc_iter……
+#         try:
+#             res = download_one(cc, base_url, verbose)  # ➎ ……不断调用 download_one 函数，执行下载。
+#         except requests.exceptions.HTTPError as exc:  # ➏ 处理 get_flag 函数抛出的与 HTTP 有关的且 download_one 函数没有处理的异常。
+#             error_msg = 'HTTP error {res.status_code} - {res.reason}'
+#             error_msg = error_msg.format(res=exc.response)
+#         except requests.exceptions.ConnectionError as exc:  # ➐ 处理其他与网络有关的异常。其他异常会中止这个脚本，因为调用download_many 函数的 flags2_common.main 函数中没有try/except 块。
+#             error_msg = 'Connection error'
+#         else:  # ➑ 如果没有异常从 download_one 函数中逃出，从 download_one 函数返回的 namedtuple（HTTPStatus）中获取 status。
+#             error_msg = ''
+#             status = res.status
+#         if error_msg:
+#             status = HTTPStatus.error  # ➒ 如果有错误，把局部变量 status 设为相应的状态。
+#         counter[status] += 1  # ➓ 以 HTTPStatus（一个 Enum）中的值为键，增加计数器。
+#         if verbose and error_msg:  # ⓫ 如果是详细模式，而且有错误，显示带有当前国家代码的错误消息。
+#             print('*** Error for {}: {}'.format(cc, error_msg))
+#     return counter  # ⓬ 返回 counter，以便 main 函数能在最终的报告中显示数量。
 
 
 def download_many(cc_list):
@@ -4450,6 +4797,21 @@ main()
 # [15:56:55] result 4: 40
 ```
 
+##### 实现下载进度
+
+```python
+pip install tqdm
+
+import time
+from tqdm import tqdm
+for i in tqdm(range(1000)):
+    time.sleep(.01)
+```
+
+
+
+
+
 ### 使用 asyncio 包处理并发
 
 ##### 通过线程以动画形式显示文本式旋转指针
@@ -4569,3 +4931,102 @@ if __name__ == '__main__':
 - 在线程版 supervisor 函数中，slow_function 函数是普通的函数，直接由线程调用。在异步版 supervisor 函数中，slow_function 函数是协程，由 yield from 驱动。
 - 没有 API 能从外部终止线程，因为线程随时可能被中断，导致系统处于无效状态。如果想终止任务，可以使用 Task.cancel() 实例方法，在协程内部抛出 CancelledError 异常。协程可以在暂停的yield 处捕获这个异常，处理终止请求。
 - supervisor 协程必须在 main 函数中由loop.run_until_complete 方法执行。
+
+##### 使用asyncio和aiohttp包下载
+
+- (1) 首先，在 download_many 函数中获取一个事件循环，处理调用
+  download_one 函数生成的几个协程对象。
+- (2) asyncio 事件循环依次激活各个协程。
+- (3) 客户代码中的协程（如 get_flag）使用 yield from 把职责委托给
+  库里的协程（如 aiohttp.request）时，控制权交还事件循环，执行
+  之前排定的协程。
+- (4) 事件循环通过基于回调的低层 API，在阻塞的操作执行完毕后获得
+  通知。
+- (5) 获得通知后，主循环把结果发给暂停的协程。
+- (6) 协程向前执行到下一个 yield from 表达式，例如 get_flag 函数
+  中的 yield from resp.read()。事件循环再次得到控制权，重复第
+  4~6 步，直到事件循环终止。
+
+> yield from foo 句法能防止阻塞，是因为当前协程（即包含 yieldfrom 代码的委派生成器）暂停后，控制权回到事件循环手中，再去驱动其他协程；foo 期物或协程运行完毕后，把结果返回给暂停的协程，将其恢复。
+
+- 我们编写的协程链条始终通过把最外层委派生成器传给 asyncio包 API 中的某个函数（如 loop.run_until_complete(...)）驱动。也就是说，使用 asyncio 包时，我们编写的代码不通过调用next(...) 函数或 .send(...) 方法驱动协程——这一点由asyncio 包实现的事件循环去做。
+- 我们编写的协程链条最终通过 yield from 把职责委托给 asyncio包中的某个协程函数或协程方法（例如示例 18-2 中的 yield fromasyncio.sleep(...)），或者其他库中实现高层协议的协程（例如示例 18-5 中 get_flag 协程里的 resp = yield fromaiohttp. request('GET', url)）。
+- 也就是说，最内层的子生成器是库中真正执行 I/O 操作的函数，而不是我们自己编写的函数。
+
+> 概括起来就是：使用 asyncio 包时，我们编写的异步代码中包含由asyncio 本身驱动的协程（即委派生成器），而生成器最终把职责委托给 asyncio 包或第三方库（如 aiohttp）中的协程。这种处理方式相当于架起了管道，让 asyncio 事件循环（通过我们编写的协程）驱动执行低层异步 I/O 操作的库函数。
+
+```python
+import os
+import time
+import sys
+import asyncio
+import aiohttp
+
+BASE_URL = 'http://flupy.org/data/flags'
+DEST_DIR = 'D:\project\downloads'
+POP20_CC = ('CN IN US ID BR PK NG BD RU JP MX PH VN ET EG DE IR TR CD FR').split()
+
+
+def save_flag(img, filename):
+    # 保存下载好的图片到本地
+    path = os.path.join(DEST_DIR, filename)
+    with open(path, 'wb') as fp:
+        fp.write(img)
+
+
+def show(text):
+    # 展示下载到的图片
+    print(text, end=' ')
+    sys.stdout.flush()
+
+
+@asyncio.coroutine  # ➌ 协程应该使用 @asyncio.coroutine 装饰。
+def get_flag(cc):
+    url = '{}/{cc}/{cc}.gif'.format(BASE_URL, cc=cc.lower())
+    resp = yield from aiohttp.request('GET', url)  # ➍ 阻塞的操作通过协程实现，客户代码通过 yield from 把职责委托给协程，以便异步运行协程。
+    image = yield from resp.read()  # ➎ 读取响应内容是一项单独的异步操作。
+    return image
+
+
+@asyncio.coroutine
+def download_one(cc):  # ➏ download_one 函数也必须是协程，因为用到了 yield from。
+    image = yield from get_flag(cc)  # ➐ 与依序下载版 download_one 函数唯一的区别是这一行中的 yieldfrom；函数定义体中的其他代码与之前完全一样。
+    show(cc)
+    save_flag(image, cc.lower() + '.gif')
+    return cc
+
+
+def download_many(cc_list):
+    loop = asyncio.get_event_loop()  # ➑ 获取事件循环底层实现的引用。
+    to_do = [download_one(cc) for cc in sorted(cc_list)]  # ➒ 调用 download_one 函数获取各个国旗，然后构建一个生成器对象列表。
+    wait_coro = asyncio.wait(to_do)  # ➓ 虽然函数的名称是 wait，但它不是阻塞型函数。wait 是一个协程，等传给它的所有协程运行完毕后结束
+    res, _ = loop.run_until_complete(wait_coro)  # ⓫ 执行事件循环，直到 wait_coro 运行结束；事件循环运行的过程中，这个脚本会在这里阻塞。
+    loop.close()  # ⓬ 关闭事件循环。
+    return len(res)
+
+
+def main(download_many):
+    t0 = time.time()
+    count = download_many(POP20_CC)
+    elapsed = time.time() - t0
+    msg = '\n{} flags downloaded in {:.2f}s'
+    print(msg.format(count, elapsed))
+
+
+if __name__ == '__main__':
+    main(download_many)
+```
+
+##### yield from 的用法
+
+- 使用 yield from 链接的多个协程最终必须由不是协程的调用方驱动，调用方显式或隐式（例如，在 for 循环中）在最外层委派生成器上调用 next(...) 函数或 .send(...) 方法。
+- 链条中最内层的子生成器必须是简单的生成器（只使用 yield）或可迭代的对象。
+
+
+
+
+
+
+
+
+
