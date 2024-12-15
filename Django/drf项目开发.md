@@ -2969,11 +2969,5 @@ from blue_krill.web.drf_utils import inject_serializer
 DRF_CROWN_DEFAULT_CONFIG = {"remain_request": True}
 ```
 
-- jq安装
 
-  ```
-  - 如果要在Windows上顺利的使用jq，需要先安装chocolatey。
-  - 以管理员身份待开cmd窗口，输入@"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"，回车。
-  - 接着输入choco install jq -y
-  ```
 
