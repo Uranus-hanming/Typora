@@ -65,10 +65,10 @@
 10. 在viewsets下的每个文件夹下的__ini\_\_.py里添加如下命令
 
    ```python
-   from .xxx import * # noqa
-   from .yyy import * # noqa
-   # 有多有个.py文件就添加多少个
-   # 目的是可以跨目录导入，如：viewsets文件夹下有个knowledge_school文件夹，其下有两个.py文件，分别是__ini.py、knowledge_info.py，knowledge_info.py里有KnowledgeViewSet类，__ini.py文件里直接导入from .knowledge_info import *，viewsets.KnowledgeViewSet就可以直接访问到。
+from .xxx import * # noqa
+from .yyy import * # noqa
+# 有多有个.py文件就添加多少个
+# 目的是可以跨目录导入，如：viewsets文件夹下有个knowledge_school文件夹，其下有两个.py文件，分别是__ini.py、knowledge_info.py，knowledge_info.py里有KnowledgeViewSet类，__ini.py文件里直接导入from .knowledge_info import *，viewsets.KnowledgeViewSet就可以直接访问到。
    ```
 
 11. 项目权限管理（ecology\permissions\sys.py）
@@ -271,7 +271,7 @@ class OperationInfoMixin(models.Model):
        > 级联删除模式：当关联表（父表）中的数据删除时，与其相对应的外键（子表）中的数据也删除。
        >
        > class Feedback(models.Model):
-       >  user = models.ForeignKey(User, on_delete=models.CASCADE， null=True, blank=Tru)
+       > user = models.ForeignKey(User, on_delete=models.CASCADE， null=True, blank=Tru)
        >
        > 当删除父表（user）时，此时关联的子表（feedback）中相应关联用户user_id的数据就会被删除。
 
@@ -682,6 +682,42 @@ class xxxSerializer(serializers.ModelSerializer):
 
 #### 视图
 
+###### 模板
+
+```python
+import django_filters
+from mainapp.utils import viewsets
+from rest_framework import serializers
+from mainapp.utils.pagination import Pagination
+from mainapp.models import Record
+
+
+class RecordSerializers(serializers.ModelSerializer):
+
+    class Meta:
+        model = Record
+        fields = "__all__"
+
+
+class RecordFilter(django_filters.FilterSet):
+    class Meta:
+        model = Record
+        fields = "__all__"
+
+
+class RecordViewSet(viewsets.ModelViewSet):
+    queryset = Record.objects.all().order_by("-id")
+    serializer_class = RecordSerializers
+    pagination_class = Pagination
+    filterset_class = RecordFilter
+    # http_method_names = ['get', 'put']
+    # authentication_classes = []
+    # permission_classes = []
+
+```
+
+
+
 ###### 1. 序列化器类
 
 ```python
@@ -773,6 +809,7 @@ class xxxxSerializer(serializers.ModelSerializer):
     class Meta:
         model = xxxx
         # fields = "__all__" 方法一：生成所有数据库字段
+        # exclude = ['name']  明确排除掉哪些字段
         fields = ['id', 'name'] # 方法二：自定义字段名
         # 深度自动化连表
         depth = 1  # 0 ~ 10
@@ -813,6 +850,26 @@ class xxxxSerializer(serializers.ModelSerializer):
           model = XXX
           fields = "__all__"
   ```
+
+```python
+# M2M二合一
+
+class p2Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = "__all__"
+
+class UsSerializer(serializers.ModelSerializer):
+    tags_info = p2Serializer(many=True, source="tags", read_only=True)
+    class Meta:
+        model = UserInfo
+        fields = ["id", "name", "age", "gender", "tags", "tags_info"]
+        extra_kwargs = {
+            "id": {"read_only": True},
+            "tags": {"write_only": True},
+        }
+```
+
 
 
 ###### 2. 分页类
@@ -1274,8 +1331,9 @@ class ServerViewSet(viewsets.ModelViewSet):
 
    
 
-1. 权限校验：CheckPermission
-2. IsAuthenticated
+3. 权限校验：CheckPermission
+
+4. IsAuthenticated
 
 ```python
 from rest_framework.permissions import BasePermission
@@ -2969,5 +3027,10 @@ from blue_krill.web.drf_utils import inject_serializer
 DRF_CROWN_DEFAULT_CONFIG = {"remain_request": True}
 ```
 
+- jq安装
 
-
+  ```
+  - 如果要在Windows上顺利的使用jq，需要先安装chocolatey。
+  - 以管理员身份待开cmd窗口，输入@"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"，回车。
+  - 接着输入choco install jq -y
+  ```
