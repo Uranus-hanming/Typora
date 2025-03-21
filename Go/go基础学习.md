@@ -19,6 +19,502 @@
 - 使用Docker部署Go Web应用：https://www.liwenzhou.com/posts/Go/deploy-in-docker/
 - 部署Go语言项目的 N 种方法：https://www.liwenzhou.com/posts/Go/deploy/
 
+##### go关键字
+
+> 程序一般由关键字、常量、变量、运算符、类型和函数组成。
+>
+> 程序中可能会使用到这些分隔符：括号 ()，中括号 [] 和大括号 {}。
+>
+> 程序中可能会使用到这些标点符号：**.**、**,**、**;**、**:** 和 **…**。
+
+- 25个关键字或保留字
+
+| break        | default         | func       | interface   | select     |
+| ------------ | --------------- | ---------- | ----------- | ---------- |
+| **case**     | **defer**       | **go**     | **map**     | **struct** |
+| **chan**     | **else**        | **goto**   | **package** | **switch** |
+| **const**    | **fallthrough** | **if**     | **range**   | **type**   |
+| **continue** | **for**         | **import** | **return**  | **var**    |
+
+- 36个预定义标识符
+
+| append    | bool        | byte        | cap         | close      | complex  | complex64 | complex128 | uint16      |
+| --------- | ----------- | ----------- | ----------- | ---------- | -------- | --------- | ---------- | ----------- |
+| **copy**  | **false**   | **float32** | **float64** | **imag**   | **int**  | **int8**  | **int16**  | **uint32**  |
+| **int32** | **int64**   | **iota**    | **len**     | **make**   | **new**  | **nil**   | **panic**  | **uint64**  |
+| **print** | **println** | **real**    | **recover** | **string** | **true** | **uint**  | **uint8**  | **uintptr** |
+
+###### type
+
+1. 定义新类型
+
+   > 通过 `type` 可以基于现有类型（如基本类型、结构体、函数签名等）创建新类型。
+
+   ```go
+   type 新类型名 基础类型
+   ```
+
+   - **类型安全**：新类型与基础类型是 **不同的类型**，不能直接混用。
+
+     ```go
+     var a int = 10
+     var b MyInt = 20
+     // a = b // 错误：类型不匹配
+     ```
+
+   - **可扩展性**：可以为新类型定义方法（Go 的**方法接收者**机制）。
+
+     ```go
+     func (m MyInt) Double() MyInt {
+         return m * 2
+     }
+     ```
+
+2. 定义结构体
+
+   > `type` 常用于定义结构体类型，用于封装多个字段。
+
+   ```go
+   type 结构体名 struct {
+       字段1 类型1
+       字段2 类型2
+       ...
+   }
+   ```
+
+   - **字段组合**：支持嵌套结构体，**实现组合**而非继承。
+
+   - **方法绑定**：可以为结构体定义方法。
+
+     ```go
+     func (p Person) Greet() string {
+         return "Hello, " + p.Name
+     }
+     ```
+
+3. 定义接口
+
+   > `type` 用于定义接口类型，描述方法集合。
+
+   ```go
+   type 接口名 interface {
+       方法1(参数列表) 返回值列表
+       方法2(参数列表) 返回值列表
+       ...
+   }
+   ```
+
+   - **隐式实现**：无需显式声明实现接口，只需实现接口方法即可。
+   - **多态性**：接口变量可以存储任何实现了该接口的具体类型值。
+
+ 4. 定义函数类型
+
+    > `type` 可以定义函数类型，用于抽象函数签名。
+
+    ```go
+    type 函数类型名 func(参数列表) 返回值列表
+    ```
+
+    - **高阶函数**：函数类型可以作为参数或返回值。
+    - **代码复用**：通过类型抽象实现通用逻辑。
+
+5. 定义类型别名
+
+   > 通过 `type` 可以为现有类型创建别名，**别名与原类型完全等价**。
+
+   ```go
+   type 别名 = 基础类型
+   ```
+
+   - **类型兼容**：别名与原类型可以互换使用。
+   - **代码可读性**：通过别名增强语义。
+
+6. 定义复杂类型
+
+   > `type` 支持定义复杂的组合类型
+
+   - **切片类型**：
+
+     ```go
+     type IntSlice []int
+     ```
+
+   - **映射类型**：
+
+     ```go
+     type StringMap map[string]string
+     ```
+
+   - **通道类型**：
+
+     ```go
+     type JobChan chan Job
+     ```
+
+7. 类型嵌入
+
+   > 通过 `type` 可以实现类型嵌入（组合），用于扩展结构体或接口。
+
+   ```go
+   type Person struct {
+       Name string
+       Age  int
+   }
+   
+   type Employee struct {
+       Person  // 嵌入 Person 类型
+       Salary float64
+   }
+   ```
+
+   - **字段提升**：嵌入类型的字段和方法会被提升到外层类型。
+   - **代码复用**：通过组合实现类似继承的效果。
+
+8. 类型约束（泛型）
+
+   ```go
+   type Number interface {
+       int | float64
+   }
+   
+   func Add[T Number](a, b T) T {
+       return a + b
+   }
+   ```
+
+   - **类型安全**：限制泛型类型参数的范围。
+   - **灵活性**：支持多种类型的通用逻辑。
+
+###### fallthrough
+
+> 在 Go 语言中，**`fallthrough`** 是一个特殊的控制流关键字，**仅用于 `switch` 语句**。它的作用是强制继续执行下一个 `case` 或 `default` 的代码块，而**不检查下一个 `case` 的条件**。
+
+###### make
+
+> **`make()`** 是一个内建函数，专门用于初始化并分配内存给 **切片（slice）**、**映射（map）** 和 **通道（channel）** 这三种引用类型的数据结构。它的作用是创建这些类型的实例，并设置它们的初始属性（如容量、长度等）
+
+1. 创建切片（Slice）
+
+   ```go
+   // 切片是动态数组，需要指定初始长度和容量（可选）。
+   
+   // 语法
+   make([]T, length, capacity)
+   
+   // 示例
+   s1 := make([]int, 5)       // 长度=5，容量=5（默认等于长度）
+   s2 := make([]int, 3, 10)   // 长度=3，容量=10
+   ```
+
+   - 长度（`length`）：切片当前包含的元素个数。
+   - 容量（`capacity`）：底层数组可容纳的元素总数（切片可动态扩展）。
+
+2. 创建映射（Map）
+
+   ```go
+   // 映射是键值对集合，需初始化后才能添加键值。
+   
+   // 语法
+   make(map[K]V, initialCapacity)
+   
+   // 示例
+   m1 := make(map[string]int)     // 初始容量未指定（由运行时决定）
+   m2 := make(map[string]bool, 10) // 初始容量为10（优化性能，避免扩容）
+   ```
+
+   - `initialCapacity` 是可选参数，提示运行时预先分配内存空间（不强制限制大小）
+
+3. 创建通道（Channel）
+
+   ```go
+   // 通道用于协程（goroutine）间通信，需指定缓冲区大小（可选）
+   
+   // 语法
+   make(chan T, bufferSize)
+   
+   // 示例
+   ch1 := make(chan int)      // 无缓冲通道（同步通信）
+   ch2 := make(chan string, 5) // 有缓冲通道（容量为5，异步通信）
+   ```
+
+   - 无缓冲通道：发送和接收操作会阻塞，直到另一方准备好。
+   - 有缓冲通道：缓冲区未满时可异步发送，未空时可异步接收。
+
+###### new()
+
+> **`new()`** 是一个内建函数，用于为指定类型分配内存并返回指向该内存的指针。它会将分配的内存初始化为类型的 **零值**，适用于所有数据类型（包括基本类型、结构体、数组等）
+
+```go
+ptr := new(T)
+```
+
+- **`T`**：任意类型（如 `int`、`struct`、自定义类型等）
+- **返回值**：指向新分配的 `T` 类型零值的指针（`*T`）
+
+| **特性**       | **`new()`**                            | **`make()`**                         |
+| :------------- | :------------------------------------- | :----------------------------------- |
+| **适用类型**   | 所有类型（如 `int`、`struct`、指针等） | 仅限 `slice`、`map`、`channel`       |
+| **返回值**     | 指向类型零值的指针（`*T`）             | 初始化后的类型实例（非指针）         |
+| **内存初始化** | 仅分配内存并清零                       | 分配内存并初始化数据结构（如哈希表） |
+
+1. 基本类型
+
+   ```go
+   // 分配一个 int 类型的零值，返回指针
+   numPtr := new(int)
+   fmt.Println(*numPtr) // 输出: 0
+   
+   // 修改指针指向的值
+   *numPtr = 42
+   fmt.Println(*numPtr) // 输出: 42
+   ```
+
+2. 结构体
+
+   ```go
+   type Person struct {
+       Name string
+       Age  int
+   }
+   
+   // 分配并初始化 Person 结构体的零值
+   p := new(Person)
+   fmt.Println(p) // 输出: &{"" 0}
+   
+   // 修改字段
+   p.Name = "Alice"
+   p.Age = 30
+   fmt.Println(p) // 输出: &{Alice 30}
+   ```
+
+3. 数组
+
+   ```go
+   // 分配长度为 3 的 int 数组，初始化为零值
+   arrPtr := new([3]int)
+   fmt.Println(*arrPtr) // 输出: [0 0 0]
+   
+   // 修改元素
+   (*arrPtr)[1] = 10
+   fmt.Println(*arrPtr) // 输出: [0 10 0]
+   ```
+
+4. 适用场景
+
+   - **需要显式指针时**
+     当函数需返回一个指向新对象的指针时：
+
+     ```go
+     func NewPerson() *Person {
+         return new(Person)
+     }
+     ```
+
+   - **避免结构体复制**
+     传递大结构体时使用指针减少内存拷贝：
+
+     ```go
+     type LargeStruct struct { /* 大量字段 */ }
+     obj := new(LargeStruct)
+     process(obj) // 传递指针而非值
+     ```
+
+   - **接口实现**
+     当类型需要实现某个接口，且需通过指针接收者定义方法时：
+
+     ```go
+     type Writer interface { Write([]byte) }
+     type MyWriter struct{}
+     
+     func (w *MyWriter) Write(data []byte) { /* ... */ }
+     
+     func main() {
+         var w Writer = new(MyWriter) // 必须用指针
+     }
+     ```
+
+###### range
+
+**基本语法**
+
+```go
+for index, value := range collection {
+    // 循环体
+}
+```
+
+- **`index`**：当前元素的索引（数组、切片、字符串）或键（map）。
+- **`value`**：当前元素的值（或 map 的值）。
+- **`collection`**：被迭代的集合（数组、切片、字符串、map、通道）。
+
+**1. 数组/切片**
+
+- **返回索引和元素值**。
+
+  ```go
+  nums := []int{10, 20, 30}
+  for i, num := range nums {
+      fmt.Printf("索引: %d, 值: %d\n", i, num)
+  }
+  
+  索引: 0, 值: 10
+  索引: 1, 值: 20
+  索引: 2, 值: 30
+  ```
+
+**2. 字符串**
+
+- **返回字符的字节索引和 Unicode 码点（rune）**。
+
+- 处理多字节字符（如 UTF-8）时，索引可能不连续。
+
+  ```go
+  s := "Go语言"
+  for i, r := range s {
+      fmt.Printf("字节索引: %d, Unicode码点: %U, 字符: %c\n", i, r, r)
+  }
+  
+  字节索引: 0, Unicode码点: U+0047, 字符: G
+  字节索引: 1, Unicode码点: U+006F, 字符: o
+  字节索引: 2, Unicode码点: U+8BED, 字符: 语
+  字节索引: 5, Unicode码点: U+8A00, 字符: 言
+  ```
+
+**3. 映射（map）**
+
+- **返回键和值**。
+
+- **遍历顺序随机**（Go 故意随机化 map 的遍历顺序）。
+
+  ```go
+  m := map[string]int{"a": 1, "b": 2}
+  for k, v := range m {
+      fmt.Printf("键: %s, 值: %d\n", k, v)
+  }
+  
+  键: a, 值: 1
+  键: b, 值: 2
+  ```
+
+**4. 通道（channel）**
+
+- **仅返回值**，持续接收数据直到通道关闭。
+
+  ```go
+  ch := make(chan int, 3)
+  ch <- 1
+  ch <- 2
+  close(ch) // 必须关闭通道，否则 range 会阻塞
+  for v := range ch {
+      fmt.Println(v)
+  }
+  
+  1
+  2
+  ```
+
+**关键特性与注意事项**
+
+**1. 值拷贝**
+
+- `range` 迭代时返回的是元素的 **副本**，而非原始元素的引用。
+
+- **修改副本不影响原数据**：
+
+  ```go
+  nums := []int{1, 2, 3}
+  for _, num := range nums {
+      num *= 2 // 仅修改副本
+  }
+  fmt.Println(nums) // 输出: [1 2 3]
+  ```
+
+- **若需修改原数据，需通过索引**：
+
+  ```go
+  for i := range nums {
+      nums[i] *= 2
+  }
+  fmt.Println(nums) // 输出: [2 4 6]
+  ```
+
+**2. 忽略返回值**
+
+- 使用 `_` 忽略不需要的值：
+
+  ```go
+  // 仅获取索引
+  for i := range nums { /* ... */ }
+  
+  // 仅获取值（切片/数组）
+  for _, num := range nums { /* ... */ }
+  
+  // 仅获取键（map）
+  for k := range m { /* ... */ }
+  ```
+
+**3. 性能优化**
+
+- **切片遍历时，直接使用索引访问可能更快**（避免值拷贝）：
+
+  ```go
+  for i := 0; i < len(nums); i++ {
+      // 直接访问 nums[i]
+  }
+  ```
+
+- **大结构体切片建议使用索引**，减少拷贝开销。
+
+**4. 循环变量重用**
+
+- `range` 的循环变量在每次迭代中会被 **重用**（内存地址相同）。
+
+- **闭包陷阱**：在异步操作（如 goroutine）中直接使用循环变量可能导致意外结果。
+
+  ```go
+  for _, num := range []int{1, 2, 3} {
+      go func() {
+          fmt.Println(num) // 可能输出 3, 3, 3
+      }()
+  }
+  ```
+
+- **修复方法**：传递参数或创建局部变量副本。
+
+  ```go
+  for _, num := range nums {
+      n := num // 创建副本
+      go func() {
+          fmt.Println(n) // 正确输出 1, 2, 3
+      }()
+  }
+  ```
+
+**5. 遍历时修改集合**
+
+- **数组/切片**：可安全修改元素值，但修改长度（如追加元素）不会影响迭代次数。
+
+  ```go
+  nums := []int{1, 2, 3}
+  for i := range nums {
+      nums[i] *= 2     // 安全
+      nums = append(nums, i) // 不影响当前循环次数
+  }
+  ```
+
+- **map**：遍历时修改键值可能导致不可预测行为，需避免。
+
+**`range` 的底层实现**
+
+- **数组/切片**：通过索引逐步访问，时间复杂度 O(n)。
+- **字符串**：按 UTF-8 解码遍历 rune。
+- **map**：随机选择一个桶开始遍历，每次迭代顺序不同。
+- **通道**：持续调用 `<-ch` 直到通道关闭。
+
+###### append
+
+
+
 
 
 ##### 大小写命名规则
@@ -436,6 +932,179 @@ func main() {
    }
    ```
 
+##### 类型转换
+
+> 在 Go 语言中，**类型转换（Type Conversion）** 是将一个类型的值显式转换为另一个类型的操作。
+>
+> Go 是**静态类型语言**，对类型安全要求严格，因此类型转换需要显式进行（不支持隐式自动转换）。
+
+###### 一、基本类型转换
+
+1. 数值类型转换
+
+   > 数值类型（如 `int`、`float`、`uint`）之间可以相互转换，但可能丢失精度或溢出。
+
+   ```go
+   var a int = 42
+   var b float64 = float64(a)  // int → float64
+   var c uint = uint(b)        // float64 → uint
+   
+   // 注意：高精度转低精度可能丢失数据
+   var x float64 = 3.14
+   var y int = int(x)          // y = 3（小数部分截断）
+   ```
+
+2. 字符串 ↔ 字节切片（`[]byte`）
+
+   > 字符串可转换为字节切片（底层共享数据，但类型不同）
+
+   ```go
+   s := "hello"
+   bytes := []byte(s)     // string → []byte
+   s2 := string(bytes)    // []byte → string
+   ```
+
+3. 字符串 ↔ 符文切片（`[]rune`）
+
+   > 字符串可转换为 Unicode 符文切片（每个 `rune` 对应一个 Unicode 码点）
+
+   ```go
+   s := "你好"
+   runes := []rune(s)     // string → []rune
+   s2 := string(runes)    // []rune → string
+   ```
+
+###### 二、自定义类型转换
+
+1. 类型别名（Type Alias）
+
+   > 类型别名与原类型可直接转换
+
+   ```go
+   type MyInt = int       // MyInt 是 int 的别名
+   var a int = 10
+   var b MyInt = a        // 无需显式转换
+   ```
+
+2. 新类型（Type Definition）
+
+   > 新定义的类型（即使底层类型相同）需显式转换
+
+   ```go
+   type Celsius float64    // 新类型
+   type Fahrenheit float64 // 新类型
+   
+   var c Celsius = 100.0
+   var f Fahrenheit = Fahrenheit(c) // 必须显式转换
+   ```
+
+###### 三、接口类型转换
+
+1. 接口 ↔ 具体类型
+
+   > 使用 **类型断言（Type Assertion）** 将接口转换为具体类型
+
+   ```go
+   var i interface{} = "hello"
+   s := i.(string)        // 类型断言，若失败会 panic
+   s, ok := i.(string)    // 安全类型断言，ok 为检测标志
+   ```
+
+2. 类型断言（Type Assertion）
+
+   ```go
+   var val interface{} = 42
+   
+   // 安全断言
+   if num, ok := val.(int); ok {
+       fmt.Println(num * 2) // 输出 84
+   } else {
+       fmt.Println("不是整数")
+   }
+   ```
+
+###### 四、特殊类型转换
+
+1. 指针类型转换
+
+   > 需使用 `unsafe` 包（一般不推荐）
+
+   ```go
+   var a int64 = 42
+   var p *int64 = &a
+   var p2 *int32 = (*int32)(unsafe.Pointer(p)) // 危险操作！
+   ```
+
+2. 结构体强制转换
+
+   > 仅当两个结构体 **内存布局完全一致** 时，可通过强制指针转换实现
+
+   ```go
+   type A struct { X int }
+   type B struct { X int }
+   
+   a := A{X: 42}
+   b := *(*B)(unsafe.Pointer(&a)) // b.X = 42
+   ```
+
+###### 五、类型转换的注意事项
+
+1. **不支持隐式转换**
+   - Go 严格禁止隐式类型转换，必须显式操作。
+
+2. **类型兼容性**
+   - 只有底层类型兼容的类型才能转换，否则需通过其他方式（如序列化）。
+
+3. **性能开销**
+   - 类型转换可能涉及内存拷贝（如 `string` ↔ `[]byte`），需注意性能。
+
+4. **数据丢失风险**
+   - 数值类型转换可能导致溢出或精度丢失
+
+###### 六、实际应用场景
+
+1. 数值计算
+
+   ```go
+   func Calculate(a int, b float64) float64 {
+       return float64(a) + b // 需统一类型
+   }
+   ```
+
+2. 处理二进制数据
+
+   ```go
+   data := []byte{0x48, 0x65, 0x6C, 0x6C, 0x6F}
+   text := string(data) // "Hello"
+   ```
+
+3. JSON 序列化（**json.Unmarshal()**）
+
+   ```go
+   type User struct {
+       Name string `json:"name"`
+       Age  int    `json:"age"`
+   }
+   
+   jsonData := []byte(`{"name":"Alice","age":30}`)
+   var user User
+   json.Unmarshal(jsonData, &user) // []byte → 结构体
+   ```
+
+4. 接口解包
+
+   ```go
+   func process(val interface{}) {
+       if s, ok := val.(string); ok {
+           fmt.Println("字符串:", s)
+       } else if i, ok := val.(int); ok {
+           fmt.Println("整数:", i)
+       }
+   }
+   ```
+
+
+
 ##### 基本数据类型
 
 - 在 Go 编程语言中，数据类型用于声明函数和变量。
@@ -600,6 +1269,103 @@ var b bool = true
   //查看结构体变量地址，可以将 & 符号放置于结构体变量前：
   struct_pointer = &Book1
   ```
+
+###### 结构体标签
+
+> 通过 **键值对（Key-Value）** 的形式为字段附加元数据（Metadata），供不同的框架或工具解析和使用。
+
+1. `json:"age"`
+
+- **作用**：
+  控制 JSON 序列化（`json.Marshal`）和反序列化（`json.Unmarshal`）时的字段名称和行为。
+- **规则**：
+  - `"age"`：JSON 字段名称为 `"age"`（默认使用结构体字段名的蛇形命名，如 `Age` → `age`）。
+  - 忽略字段：`json:"-"`（不参与序列化）。
+  - 忽略空值：`json:"age,omitempty"`（字段为零值时，JSON 中不显示该字段）。
+
+2. `binding:"required"`
+
+- **作用**：
+  用于 **Gin 框架** 的参数绑定和验证，表示该字段为必填项。
+- **规则**：
+  - `"required"`：字段必须存在且非零值（如 `string` 不能为空字符串，`int` 不能为 `0`）。
+  - 其他验证规则：如 `min=1`、`max=100`、`email` 等（需结合 Gin 的验证器使用）。
+
+3. `label:"年龄"`
+
+- **作用**：
+  通常用于定义字段的友好名称（如表单显示、错误提示）。
+  **注意**：`label` 标签不是 Go 标准库或 Gin 内置的标签，需要开发者自行解析（或通过第三方库实现）。
+
+4. `gorm`（数据库 ORM）
+   - 用于定义数据库表的字段约束（需配合 GORM 框架）
+
+5. `form`（表单绑定）
+   - 用于 Gin 框架的表单参数绑定（即URL中?后面所带的参数）
+
+6. `xml`（XML 编码）
+   - 控制 XML 序列化/反序列化的字段名称
+
+7. `yaml`（YAML 编码）
+
+   - 控制 YAML 序列化/反序列化的字段名称
+
+   ```go
+   type Config struct {
+       Port int `yaml:"port" default:"8080"`
+   }
+   ```
+
+8. `bson`（MongoDB 驱动）
+
+9. `validate`（通用验证）
+   - 通用参数验证（需配合验证库如 `go-playground/validator`）
+
+10. `db`（SQL 数据库驱动）
+    - 用于 SQL 查询的字段映射（如 `sqlx` 或 `gorm`）
+
+11. `mapstructure`（配置解析）
+
+    - 用于将 `map` 数据解码到结构体（如 Viper 配置管理）
+
+    ```go
+    type ServerConfig struct {
+        Port int `mapstructure:"server_port"`
+    }
+    ```
+
+###### 标签语法规则
+
+1. **格式**：
+
+   键值对用空格分隔，多个键值对可以共存：
+
+   ```go
+   Field Type `key1:"value1" key2:"value2"`
+   ```
+
+2. **键名约定**：
+
+   标签的键名（如 `json`、`gorm`）由框架或工具定义，需遵循其文档规则。
+
+3. **值格式**：
+
+   值可以是单个字符串或多个逗号分隔的参数：
+
+   ```go
+   Field string `json:"name,omitempty" validate:"required,email"`
+   ```
+
+4. **自定义标签**：
+
+   开发者可以通过反射（`reflect` 包）解析自定义标签：
+
+   ```go
+   field := reflect.TypeOf(obj).Field(0)
+   label := field.Tag.Get("label") // 获取 label 标签的值
+   ```
+
+
 
 ##### 函数类型
 
@@ -1457,12 +2223,18 @@ func main() {
 > c.DefaultPostForm()
 >
 > c.PostForm()
+>
+> c.ShouldBindQuery()
 
 ```go
 func main() {
 	//Default返回一个默认的路由引擎
 	r := gin.Default()
 	r.POST("/user/search", func(c *gin.Context) {
+        // 使用c.ShouldBindQuery()
+        var cr BannerListRequest
+		c.ShouldBindQuery(&cr)
+        
 		// DefaultPostForm取不到值时会返回指定的默认值
 		//username := c.DefaultPostForm("username", "小王子")
 		username := c.PostForm("username")
@@ -1583,11 +2355,10 @@ func main() {
   }
   ```
 
-###### 4. 获取path参数
+###### 4. 获取path参数(c.Param())
 
 > 请求的参数通过URL路径传递
 >
-> c.Param()
 
 ```go
 func main() {
@@ -1608,11 +2379,10 @@ func main() {
 }
 ```
 
-###### 5. 参数绑定
+###### 5. 参数绑定(c.ShouldBind(&login))
 
 > 基于请求的`Content-Type`识别请求数据类型并利用反射机制自动提取请求中`QueryString`、`form表单`、`JSON`、`XML`等参数到结构体中
 >
-> c.ShouldBind(&login)
 
 ```go
 // Binding from JSON
@@ -1671,6 +2441,29 @@ func main() {
 	router.Run(":8080")
 }
 ```
+
+###### 6. url参数绑定(c.ShouldBindUri())
+
+```go
+r.GET("logs/:id", app.LogReadView)
+
+type IDRequest struct {
+	ID uint `json:"id" form:"id" uri:"id"`
+}
+
+func LogReadView(c *gin.Context) {
+	var cr models.IDRequest
+    // 绑定id
+	err := c.ShouldBindUri(&cr)
+	if err != nil {
+		res.FailWithError(err, c)
+		return
+	}
+```
+
+
+
+
 
 ##### 文件上传
 
@@ -2042,35 +2835,6 @@ func main() {
 
 
 
-
-
-
-##### jwt模块
-
-```go
-import "github.com/golang-jwt/jwt"
-
-// JTW 密钥
-var jwtSecret = []byte("boy_next_door")
-
-// 签名一个 JTW
-func SignJWT(user types.User) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"name": user.Name,
-		"id":   user.Id,
-		"exp":  time.Now().Add(time.Hour * 24 * 30).Unix(),
-	})
-	tokenString, err := token.SignedString([]byte(jwtSecret))
-	return tokenString, err
-}
-
-// 用户表
-type User struct {
-	Id       int    `json:"id"`
-	Name     string `json:"name"`
-	Password string `json:"password"`
-}
-```
 
 ##### 项目部署
 

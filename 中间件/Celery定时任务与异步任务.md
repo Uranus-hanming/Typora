@@ -113,64 +113,246 @@ window:celery worker -A celery_app -l info -P eventlet
 
 > 执行python命令运行client.py文件。
 
-##### 定時任務
+##### django中实现定时任务
 
 > celery beat进程通过读取配置文件的内容，周期性地将定时任务发往任务队列。
 
-- 除了celerconfig.py内容增加了定时调度内容，其他模块和异步任务相同。
+###### 基本配置
 
-  ```python
-  # celerconfig.py代码如下：
-  from datetime import timedelta
-  from celery.schedules import crontab
-   
-  # 指定broker
-  BROKER_URL = 'redis://127.0.0.1:6379'
-  # 指定backend
-  CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/0'
-   
-  # 指定时区
-  CELERY_TIMEZONE = 'Asia/Shanghai'
-   
-  # 指定导入的任务模块
-  CELERY_IMPORTS = (
-      'celery_app.task1',
-      'celery_app.task2'
-  )
-   
-  # 定时调度schedules
-  CELERYBEAT_SCHEDULE={
-      'add-every-30-seconds':{
-          'task':'celery_app.task1.add',
-          'schedule':timedelta(seconds=30),  # 每30秒执行一次
-          'args':(2,3)                        # 任务函数参数
-      },
-   
-      'multiply-every-30-seconds':{
-          'task':'celery_app.task2.multiply',
-          'schedule':crontab(hour=14,minute=30), # 每天下午2点30分执行一次
-          'args':(2,3)                            # 任务函数参数
-      }
-   
-  }
-  ```
+1. 安装依赖包
 
-- 启动worker进程，然后启动beat进程，定时任务将被发送到broker
+   ```go
+   pip install celery django-celery-beat django-celery-results redis
+   ```
 
-  ```shell
-  # 首先保證redir已經啟動
-  # 启动worker进程，然后启动beat进程，定时任务将被发送到broker
-  celery worker -A celery_app -l info -P eventlet # 啟動worker
-  celery beat -A celery_app # 啟動beat進程
-  
-  # linux
-  celery -A celery_app worker --loglevel=info
-  celery -A celery_app beat
-  
-  # 将启动worker进程和beat进程放在一条命令中：
-  celery -B -A celery_app worker -l info -P eventlet window
-  celery -B -A celery_app worker --loglevel=info linux?
-  ```
+2. settings.py
+
+   ```go
+   INSTALLED_APPS = [
+       'django_celery_beat',
+       'django_celery_results',
+   ]
+   
+   # Celery配置
+   CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'  # 使用Redis作为消息代理
+   CELERY_RESULT_BACKEND = 'django-db'  # 使用数据库存储任务结果
+   CELERY_TIMEZONE = 'Asia/Shanghai'  # 设置时区
+   DJANGO_CELERY_BEAT_TZ_AWARE = False  # 关闭时区感知
+   CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'  # 使用数据库调度器
+   
+   # 定时任务配置
+   CELERY_BEAT_SCHEDULE = {
+       'get_tapd_data': {
+           'task': 'mainapp.tapd.tasks.tapd_task',
+           'schedule': 100,  # 每天执行（单位：秒）
+       }
+   }
+   ```
+
+3. 创建celery实例
+
+   ```python
+   # myproject/celery.py
+   
+   import os
+   from celery import Celery
+   from django.conf import settings
+   
+   os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'myproject.settings')
+   
+   app = Celery('myproject')
+   
+   # 从Django配置文件中读取Celery配置
+   app.config_from_object('django.conf:settings', namespace='CELERY')
+   
+   # 自动发现所有Django应用中的tasks.py文件
+   app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
+   ```
+
+4. 初始化项目文件（init.py）
+
+   ```python
+   # myproject/__init__.py
+   
+   from .celery import app as celery_app
+   
+   __all__ = ('celery_app',)
+   ```
+
+5. 编写定时任务（myapp/tasks.py）
+
+   ```python
+   # myapp/tasks.py
+   
+   from celery import shared_task
+   import time
+   
+   @shared_task
+   def send_daily_emails():
+       """示例任务：每天发送邮件"""
+       print("开始发送每日邮件...")
+       time.sleep(5)  # 模拟耗时操作
+       print("邮件发送完成！")
+       return "已发送所有每日邮件"
+   
+   @shared_task
+   def clear_temp_data():
+       """示例任务：每小时清理临时数据"""
+       print("清理临时数据中...")
+       return "临时数据已清理"
+   ```
+
+6. 数据库表迁移
+
+   ```python
+   python manage.py migrate
+   ```
+
+###### 项目部署配置
+
+1. docker-compose.py
+
+   ```yaml
+   version: '3'
+   
+   services:
+     django:
+       build: .
+       container_name: myproject
+       command: python manage.py runserver 0.0.0.0:8080
+       volumes:
+         - .:/home/myproject
+       ports:
+         - "8080:8080"
+       depends_on:
+         - db
+         - redis
+       environment:
+         - MYSQL_DATABASE=myproject
+         - MYSQL_USER=root
+         - MYSQL_PASSWORD=123456
+         - MYSQL_ROOT_PASSWORD=123456
+         - MYSQL_PORT=13306
+         - MYSQL_HOST=127.0.0.1
+         - REDIS_HOST=127.0.0.1
+         - DEBUG=False
+       restart: always
+   
+     db:
+       image: mysql:latest
+       container_name: myproject_db
+       environment:
+         - MYSQL_DATABASE=myproject
+         - MYSQL_ROOT_PASSWORD=123456
+       ports:
+         - "13306:3306"
+       volumes:
+         - /home/db_data:/var/lib/mysql  # 将本地目录挂载到容器的初始化脚本目录
+       restart: always
+   
+     redis:
+       image: redis:latest
+       container_name: redis
+       ports:
+         - "6379:6379"
+       networks:
+         - backend
+       healthcheck:
+         test: [ "CMD", "redis-cli", "ping" ]
+         interval: 5s
+         timeout: 3s
+         retries: 3
+   
+     celery_worker:
+       build: .
+       container_name: worker
+       command: bash start-celery-worker.sh
+       volumes:
+         - .:/app
+       depends_on:
+         - redis
+         - django
+       environment:
+         - MYSQL_DATABASE=myproject
+         - MYSQL_USER=root
+         - MYSQL_PASSWORD=123456
+         - MYSQL_ROOT_PASSWORD=123456
+         - MYSQL_PORT=13306
+         - MYSQL_HOST=127.0.0.1
+         - REDIS_HOST=127.0.0.1
+         - DEBUG=False
+       networks:
+         - backend
+       restart: unless-stopped
+       healthcheck:
+         test: [ "CMD", "celery", "-A", "config", "inspect", "ping" ]
+         interval: 30s
+         timeout: 10s
+         retries: 3
+   
+     celery_beat:
+       build: .
+       container_name: beat
+       command: bash start-celery-beat.sh
+       volumes:
+         - .:/app
+       depends_on:
+         - redis
+         - django
+       environment:
+         - MYSQL_DATABASE=myproject
+         - MYSQL_USER=root
+         - MYSQL_PASSWORD=123456
+         - MYSQL_ROOT_PASSWORD=123456
+         - MYSQL_PORT=13306
+         - MYSQL_HOST=127.0.0.1
+         - REDIS_HOST=127.0.0.1
+         - DEBUG=False
+       networks:
+         - backend
+       restart: unless-stopped
+   
+   networks:
+     backend:
+       driver: bridge
+   ```
+
+2. start-celery-worker.sh
+
+   ```shell
+   #!/bin/sh
+   
+   # 等待依赖服务就绪
+   while ! nc -z log_redis 6379; do
+     echo "等待Redis启动..."
+     sleep 1
+   done
+   
+   echo "启动Celery Worker..."
+   exec celery -A myproject worker \
+     --loglevel=info \
+     --concurrency=4 \
+     --hostname=worker@%h
+   ```
+
+3. bash start-celery-beat.sh
+
+   ```shell
+   #!/bin/sh
+   
+   # 等待依赖服务就绪
+   while ! nc -z log_redis 6379; do
+     echo "等待Redis启动..."
+     sleep 1
+   done
+   
+   echo "启动Celery Beat..."
+   exec celery -A myproject beat \
+     --loglevel=info \
+     --scheduler django_celery_beat.schedulers:DatabaseScheduler
+   ```
+
+
 
 ##### django-celery-beat
 

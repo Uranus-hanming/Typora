@@ -185,6 +185,58 @@ mysql数据库：
   }
   ```
 
+##### redis配置
+
+- redis连接初始化
+
+  ```go
+  import (
+  	"blogx_server/global"
+  	"github.com/go-redis/redis"
+  	"github.com/sirupsen/logrus"
+  )
+  
+  type Redis struct {
+  	Addr     string `yaml:"addr"`
+  	Password string `yaml:"password"`
+  	DB       int    `yaml:"db"`
+  }
+  
+  func InitRedis() *redis.Client {
+  	r := global.Config.Redis
+  	redisDB := redis.NewClient(&redis.Options{
+  		Addr:     r.Addr,     // 不写默认就是这个
+  		Password: r.Password, // 密码
+  		DB:       r.DB,       // 默认是0
+  	})
+  	_, err := redisDB.Ping().Result()
+  	if err != nil {
+  		logrus.Fatalf("redis连接失败 %s", err)
+  	}
+  	logrus.Info("redis连接成功")
+  	return redisDB
+  }
+  ```
+
+- redis的使用
+
+  ```go
+  // 添加数据
+  _, err = global.Redis.Set(key, value.String(), time.Duration(second)*time.Second).Result()
+  	if err != nil {
+  		logrus.Errorf("redis添加黑名单失败 %s", err)
+  		return
+  	}
+  
+  // 获取数据
+  value, err := global.Redis.Get(key).Result()
+  if err != nil {
+      return
+  }
+  ```
+
+
+
 ##### 数据库配置
 
 ###### mysql连接配置
@@ -513,9 +565,7 @@ type UserConfModel struct {
    | `omitempty` | 空值时忽略该字段                                             | `json:"nickname,omitempty"` |
    | `string`    | 强制数值类型序列化为字符串                                   | `json:"age,string"`         |
 
-
-
-###### 数据库迁移
+###### 数据库迁移(DB.AutoMigrate(&Model))
 
 ```go
 package flags
@@ -551,6 +601,7 @@ type UserModel struct {
 func FlagDB() {
 	err := DB.AutoMigrate(
 		&UserModel{},
+        ...
 	)
 	if err != nil {
 		logrus.Errorf("数据迁移失败 %s", err)
@@ -560,11 +611,651 @@ func FlagDB() {
 }
 ```
 
+###### 列表查询(query.Offset(offset).Limit(limit).Find(&list).Error)
+
+- enter.go
+
+  ```go
+  type BannerApi struct {
+  }
+  
+  type BannerListRequest struct {
+  	common.PageInfo
+  	Show bool `form:"show"`
+  }
+  
+  func (BannerApi) BannerListView(c *gin.Context) {
+  	var cr BannerListRequest
+  	c.ShouldBindQuery(&cr)
+  
+  	list, count, _ := common.ListQuery(models.BannerModel{
+  		Show: cr.Show,
+  	}, common.Options{
+  		PageInfo: cr.PageInfo,
+  	})
+  
+  	res.OkWithList(list, count, c)
+  }
+  ```
+
+- list.query.go
+
+  ```go
+  // common/list_query.go
+  package common
+  
+  import (
+  	"blogx_server/global"
+  	"fmt"
+  	"gorm.io/gorm"
+  )
+  
+  type PageInfo struct {
+  	Limit int    `form:"limit"`
+  	Page  int    `form:"page"`
+  	Key   string `form:"key"`
+  	Order string `form:"order"` // 前端可以覆盖
+  }
+  
+  func (p PageInfo) GetPage() int {
+  	if p.Page > 20 || p.Page <= 0 {
+  		return 1
+  	}
+  	return p.Page
+  }
+  
+  func (p PageInfo) GetLimit() int {
+  	if p.Limit <= 0 || p.Limit > 100 {
+  		return 10
+  	}
+  	return p.Limit
+  }
+  func (p PageInfo) GetOffset() int {
+  	return (p.GetPage() - 1) * p.GetLimit()
+  }
+  
+  type Options struct {
+  	PageInfo     PageInfo
+  	Likes        []string
+  	Preloads     []string
+  	Where        *gorm.DB
+  	Debug        bool
+  	DefaultOrder string
+  }
+  
+  func ListQuery[T any](model T, option Options) (list []T, count int, err error) {
+  
+  	// 自己的基础查询
+  	query := global.DB.Model(model).Where(model)
+  
+  	// 日志
+  	if option.Debug {
+  		query = query.Debug()
+  	}
+  
+  	// 模糊匹配
+  	if len(option.Likes) > 0 && option.PageInfo.Key != "" {
+  		likes := global.DB.Where("")
+  		for _, column := range option.Likes {
+  			likes.Or(
+  				fmt.Sprintf("%s like ?", column),
+  				fmt.Sprintf("%%%s%%", option.PageInfo.Key))
+  		}
+  		query = query.Where(likes)
+  	}
+  
+  	// 高级查询
+  	if option.Where != nil {
+  		query = query.Where(option.Where)
+  	}
+  
+  	// 预加载
+  	for _, preload := range option.Preloads {
+  		query = query.Preload(preload)
+  	}
+  
+  	// 查总数
+  	var _c int64
+  	query.Count(&_c)
+  	count = int(_c)
+  
+  	// 分页
+  	limit := option.PageInfo.GetLimit()
+  	offset := option.PageInfo.GetOffset()
+  
+  	// 排序
+  	if option.PageInfo.Order != "" {
+  		// 在外层配置了
+  		query = query.Order(option.PageInfo.Order)
+  	} else {
+  		if option.DefaultOrder != "" {
+  			query = query.Order(option.DefaultOrder)
+  		}
+  	}
+  
+  	err = query.Offset(offset).Limit(limit).Find(&list).Error
+  	return
+  }
+  
+  ```
+
+###### 单例查询(DB.Take(&model, id).Error)
+
+```go
+var log models.LogModel
+err = DB.Take(&log, id).Error
+```
+
+###### 创建操作(DB.Create(&model{key: value, ...}).Error)
+
+- 语法
+
+  ```go
+  err = global.DB.Create(&model{
+      key1: value1,
+      key2: value2,
+      ...
+  }).Error
+  if err != nil {
+  		// 处理错误逻辑
+  		return
+  	}
+  ```
+
+- 案例
+
+  ```go
+  func (BannerApi) BannerCreateView(c *gin.Context) {
+  	var cr BannerCreateRequest
+  	err := c.ShouldBindJSON(&cr)
+  	if err != nil {
+  		res.FailWithError(err, c)
+  		return
+  	}
+  	err = global.DB.Create(&models.BannerModel{
+  		Cover: cr.Cover,
+  		Href:  cr.Href,
+  		Show:  cr.Show,
+  	}).Error
+  	if err != nil {
+  		res.FailWithError(err, c)
+  		return
+  	}
+  	res.OkWithMsg("添加banner成功", c)
+  }
+  ```
+
+###### 更新操作(DB.Model(&model).Updates().Error)
+
+```go
+type IDRequest struct {
+	ID uint `json:"id" form:"id" uri:"id"`
+}
+
+type BannerCreateRequest struct {
+	Cover string `json:"cover" binding:"required"`
+	Href  string `json:"href"`
+	Show  bool   `json:"show"`
+}
+
+type Model struct {
+	ID        uint      `gorm:"primaryKey" json:"id"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+type BannerModel struct {
+	Model
+	Show  bool   `json:"show"`  // 是否展示
+	Cover string `json:"cover"` // 图片链接
+	Href  string `json:"href"`  // 跳转链接
+}
+
+func (BannerApi) BannerUpdateView(c *gin.Context) {
+	var id models.IDRequest
+	err := c.ShouldBindUri(&id)
+	if err != nil {
+		res.FailWithError(err, c)
+		return
+	}
+	var cr BannerCreateRequest
+	err = c.ShouldBindJSON(&cr)
+	if err != nil {
+		res.FailWithError(err, c)
+		return
+	}
+
+	var model models.BannerModel
+	err = global.DB.Take(&model, id.ID).Error
+	if err != nil {
+		res.FailWithMsg("不存在的banner", c)
+		return
+	}
+
+	err = global.DB.Model(&model).Updates(map[string]any{
+		"cover": cr.Cover,
+		"href":  cr.Href,
+		"show":  cr.Show,
+	}).Error
+	if err != nil {
+		res.FailWithError(err, c)
+		return
+	}
+	res.OkWithMsg("banner更新成功", c)
+}
+```
+
+###### 删除操作(DB.Delete(&logList))
+
+```go
+// 支持删除多条
+type RemoveRequest struct {
+	IDList []uint `json:"IDList"`
+}
+
+func (LogApi) LogRemoveView(c *gin.Context) {
+	var cr models.RemoveRequest
+	err := c.ShouldBindJSON(&cr)
+	if err != nil {
+		res.FailWithError(err, c)
+		return
+	}
+
+	var logList []models.LogModel
+	global.DB.Find(&logList, "id in ?", cr.IDList)
+
+	if len(logList) > 0 {
+		global.DB.Delete(&logList)
+	}
+```
+
+###### 过滤分页排序
+
+- common/list_query.go
+
+  ```go
+  package common
+  
+  import (
+  	"blogx_server/global"
+  	"fmt"
+  	"gorm.io/gorm"
+  )
+  
+  type PageInfo struct {
+  	Limit int    `form:"limit"`  // 分页，每页的条目
+  	Page  int    `form:"page"`  // 查询第几页
+  	Key   string `form:"key"`  // 关键字查询，模糊查询
+  	Order string `form:"order"` // 排序，前端可以覆盖
+  }
+  
+  func (p PageInfo) GetPage() int {
+  	if p.Page > 20 || p.Page <= 0 {
+  		return 1
+  	}
+  	return p.Page
+  }
+  
+  func (p PageInfo) GetLimit() int {
+  	if p.Limit <= 0 || p.Limit > 100 {
+  		return 10
+  	}
+  	return p.Limit
+  }
+  func (p PageInfo) GetOffset() int {
+  	return (p.GetPage() - 1) * p.GetLimit()
+  }
+  
+  type Options struct {
+  	PageInfo     PageInfo
+  	Likes        []string
+  	Preloads     []string
+  	Where        *gorm.DB
+  	Debug        bool
+  	DefaultOrder string
+  }
+  
+  func ListQuery[T any](model T, option Options) (list []T, count int, err error) {
+  
+  	// 自己的基础查询
+  	query := global.DB.Model(model).Where(model)
+  
+  	// 日志
+  	if option.Debug {
+  		query = query.Debug()
+  	}
+  
+  	// 模糊匹配
+  	if len(option.Likes) > 0 && option.PageInfo.Key != "" {
+  		likes := global.DB.Where("")
+  		for _, column := range option.Likes {
+  			likes.Or(
+  				fmt.Sprintf("%s like ?", column),
+  				fmt.Sprintf("%%%s%%", option.PageInfo.Key))
+  		}
+  		query = query.Where(likes)
+  	}
+  
+  	// 高级查询
+  	if option.Where != nil {
+  		query = query.Where(option.Where)
+  	}
+  
+  	// 预加载
+  	for _, preload := range option.Preloads {
+  		query = query.Preload(preload)
+  	}
+  
+  	// 查总数
+  	var _c int64
+  	query.Count(&_c)
+  	count = int(_c)
+  
+  	// 分页
+  	limit := option.PageInfo.GetLimit()
+  	offset := option.PageInfo.GetOffset()
+  
+  	// 排序
+  	if option.PageInfo.Order != "" {
+  		// 在外层配置了
+  		query = query.Order(option.PageInfo.Order)
+  	} else {
+  		if option.DefaultOrder != "" {
+  			query = query.Order(option.DefaultOrder)
+  		}
+  	}
+  
+  	err = query.Offset(offset).Limit(limit).Find(&list).Error
+  	return
+  }
+  ```
+
+- api/log_api/enter.go
+
+  ```go
+  package log_api
+  
+  import (
+  	"blogx_server/common"
+  	"blogx_server/common/res"
+  	"blogx_server/models"
+  	"blogx_server/models/enum"
+  	"github.com/gin-gonic/gin"
+  )
+  
+  type LogApi struct {
+  }
+  
+  // 这里自定义配置的字段属性，表示允许接收前端传来的表单信息
+  type LogListRequest struct {
+  	common.PageInfo
+  	LogType     enum.LogType      `form:"logType"` // 日志类型 1 2 3
+  	Level       enum.LogLevelType `form:"level"`
+  	UserID      uint              `form:"userID"`
+  	IP          string            `form:"ip"`
+  	LoginStatus bool              `form:"loginStatus"`
+  	ServiceName string            `form:"serviceName"`
+  }
+  
+  type LogListResponse struct {
+  	models.LogModel
+  	UserNickname string `json:"userNickname"`
+  	UserAvatar   string `json:"userAvatar"`
+  }
+  
+  func (LogApi) LogListView(c *gin.Context) {
+  	// 分页 查询（精确查询，模糊匹配）
+  	var cr LogListRequest
+  	err := c.ShouldBindQuery(&cr)
+  	if err != nil {
+  		res.FailWithError(err, c)
+  		return
+  	}
+  
+  	list, count, err := common.ListQuery(models.LogModel{
+  		LogType:     cr.LogType,
+  		Level:       cr.Level,
+  		UserID:      cr.UserID,
+  		IP:          cr.IP,
+  		LoginStatus: cr.LoginStatus,
+  		ServiceName: cr.ServiceName,
+  	}, common.Options{
+  		PageInfo:     cr.PageInfo,
+  		Likes:        []string{"title", "service_name"},  // 配置可以模糊搜索的字段信息
+  		Preloads:     []string{"UserModel"},
+  		Debug:        true,
+  		DefaultOrder: "created_at desc",  // 配置根据哪个字段进行排序，是否倒序，且前端可以传表单信息进行覆盖
+  	})
+  
+  	var _list = make([]LogListResponse, 0)
+  	for _, logModel := range list {
+  		_list = append(_list, LogListResponse{
+  			LogModel:     logModel,
+  			UserNickname: logModel.UserModel.Nickname,
+  			UserAvatar:   logModel.UserModel.Avatar,
+  		})
+  	}
+  
+  	res.OkWithList(_list, int(count), c)
+  	return
+  
+  }
+  ```
+
+##### GORM钩子函数
+
+> 在 GORM（Go 的 ORM 框架）中，**数据库钩子（Hooks）** 是一组预定义的方法，允许你在模型的生命周期（如创建、更新、删除）的特定阶段插入自定义逻辑。
+>
+> 这些钩子方法会在执行数据库操作（如 `Get`、`Create`、`Update`、`Delete` 等）时自动触发。
+
+###### GORM支持的钩子函数
+
+| **钩子方法**       | **触发时机**                                                 |
+| :----------------- | :----------------------------------------------------------- |
+| **`BeforeSave`**   | 在执行 `Save` 或任何包含 `Save` 的操作（如 `Create`、`Update`）**之前**触发 |
+| **`AfterSave`**    | 在执行 `Save` 或相关操作**之后**触发                         |
+| **`BeforeCreate`** | 在执行 `Create` 操作**之前**触发                             |
+| **`AfterCreate`**  | 在执行 `Create` 操作**之后**触发                             |
+| **`BeforeUpdate`** | 在执行 `Update` 操作**之前**触发                             |
+| **`AfterUpdate`**  | 在执行 `Update` 操作**之后**触发                             |
+| **`BeforeDelete`** | 在执行 `Delete` 操作**之前**触发                             |
+| **`AfterDelete`**  | 在执行 `Delete` 操作**之后**触发                             |
+| **`AfterFind`**    | 在执行查询操作（如 `First`、`Find`）**之后**触发             |
+| **`BeforeQuery`**  | 在执行任何查询操作（如 `Find`、`First`）**之前**触发         |
+| **`AfterQuery`**   | 在执行任何查询操作**之后**触发                               |
+
+###### 钩子函数的应用
+
+1. 密码加密
+
+   ```go
+   type User struct {
+       ID       uint
+       Username string
+       Password string
+   }
+   
+   // BeforeCreate 钩子：创建用户前加密密码
+   func (u *User) BeforeCreate(tx *gorm.DB) error {
+       hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
+       if err != nil {
+           return err
+       }
+       u.Password = string(hashedPassword)
+       return nil
+   }
+   
+   // 创建用户时自动触发加密
+   user := User{Username: "alice", Password: "123456"}
+   db.Create(&user)
+   ```
+
+2. 错误处理
+
+   ```go
+   // 在钩子中返回 error 会 终止后续操作 并回滚事务
+   
+   func (u *User) BeforeDelete(tx *gorm.DB) error {
+       if u.Username == "admin" {
+           return errors.New("禁止删除管理员用户")
+       }
+       return nil
+   }
+   
+   // 尝试删除管理员会失败
+   db.Delete(&User{Username: "admin"}) // 错误：禁止删除管理员用户
+   ```
+
+3. 自动维护时间戳
+
+   ```go
+   type Post struct {
+       ID        uint
+       Title     string
+       CreatedAt time.Time
+       UpdatedAt time.Time
+   }
+   
+   // BeforeCreate 钩子：设置创建时间
+   func (p *Post) BeforeCreate(tx *gorm.DB) error {
+       p.CreatedAt = time.Now()
+       return nil
+   }
+   
+   // BeforeUpdate 钩子：设置更新时间
+   func (p *Post) BeforeUpdate(tx *gorm.DB) error {
+       p.UpdatedAt = time.Now()
+       return nil
+   }
+   ```
+
+4. 级联删除关联资源
+
+   ```go
+   type Article struct {
+       ID      uint
+       Content string
+       Images  []Image `gorm:"foreignKey:ArticleID"`
+   }
+   
+   // BeforeDelete 钩子：删除文章前删除关联图片
+   func (a *Article) BeforeDelete(tx *gorm.DB) error {
+       // 删除所有关联的图片记录
+       if err := tx.Where("article_id = ?", a.ID).Delete(&Image{}).Error; err != nil {
+           return err
+       }
+       // 删除本地文件（假设 Image 模型有 Path 字段）
+       var images []Image
+       tx.Model(&a).Association("Images").Find(&images)
+       for _, img := range images {
+           os.Remove(img.Path)
+       }
+       return nil
+   }
+   ```
+
+5. 数据校验
+
+   ```go
+   type Product struct {
+       ID    uint
+       Price float64
+   }
+   
+   // BeforeSave 钩子：校验价格必须为正数
+   func (p *Product) BeforeSave(tx *gorm.DB) error {
+       if p.Price <= 0 {
+           return errors.New("价格必须大于 0")
+       }
+       return nil
+   }
+   ```
+
+###### 高级用法
+
+1. 跳过钩子
+
+   ```go
+   // 跳过所有钩子
+   db.Session(&gorm.Session{SkipHooks: true}).Create(&user)
+   ```
+
+2. 事务中的钩子
+
+   ```go
+   // 钩子默认在事务内执行。若钩子返回错误，整个操作会回滚：
+   
+   func (u *User) BeforeCreate(tx *gorm.DB) error {
+       // 在事务中执行操作
+       if err := tx.Create(&Profile{UserID: u.ID}).Error; err != nil {
+           return err
+       }
+       return nil
+   }
+   ```
+
+###### 钩子函数的实现机制
+
+> 钩子函数的自动调用是通过 **反射（Reflection）** 和 **接口方法匹配** 机制实现的。
+>
+> GORM 内部维护了一个钩子方法列表，覆盖了所有支持的钩子类型（如 `BeforeCreate`、`AfterUpdate` 等）。当执行数据库操作（如 `Create`、`Update`）时，GORM 会按顺序触发对应阶段的钩子。
+
+- 方法签名的强制匹配
+
+  ```go
+  // GORM 要求钩子方法的签名必须严格符合以下格式：
+  func (model *YourModel) HookName(tx *gorm.DB) error{
+      // 业务逻辑
+      return nil  // 若返回非 `nil` 错误，GORM 会终止操作并回滚
+  }
+  ```
+
+  - **方法名**：如 `BeforeCreate`、`AfterUpdate`，必须与钩子名称完全一致。
+
+    > 约定优于配置：GORM 通过 **方法名的约定**（如 `BeforeCreate`）自动关联钩子，开发者无需手动注册钩子或修改框架代码。
+
+  - **参数**：必须接受一个 `*gorm.DB` 参数（表示当前数据库事务）。
+
+    > 钩子方法在数据库事务中执行，若钩子返回错误，GORM 会自动回滚整个操作
+
+  - **返回值**：必须返回 `error` 类型（若返回非 `nil` 错误，GORM 会终止操作并回滚）。
+
+- GORM源码中的钩子调用
+
+  ```go
+  // 伪代码：GORM 的钩子处理器
+  func CallMethod(db *gorm.DB, hookName string) error {
+      // 通过反射获取模型实例：利用 Go 的反射机制，GORM 能在运行时动态检查并调用模型的方法，实现高度灵活性
+      modelValue := reflect.ValueOf(db.Statement.Model)
+      method := modelValue.MethodByName(hookName)
+      
+      if method.IsValid() {
+          // 调用钩子方法
+          result := method.Call([]reflect.Value{reflect.ValueOf(db)})
+          if len(result) > 0 && !result[0].IsNil() {
+              return result[0].Interface().(error)
+          }
+      }
+      return nil
+  }
+  
+  // 在 Create 操作中触发钩子
+  func CreateCallback(db *gorm.DB) {
+      // 触发 BeforeCreate：GORM 通过 方法名的约定自动关联钩子，开发者无需手动注册钩子或修改框架代码
+      if err := CallMethod(db, "BeforeCreate"); err != nil {
+          db.AddError(err)
+          return
+      }
+      
+      // 执行 INSERT 操作
+      executeSQL(db)
+      
+      // 触发 AfterCreate
+      CallMethod(db, "AfterCreate")
+  }
+  ```
 
 
-###### 表增删改查操作
-
-###### 数据过滤操作
 
 
 
@@ -573,48 +1264,135 @@ func FlagDB() {
 - main.go
 
   ```go
-  // 注册路由
-  r := routers.SetupRouter()
-  if err := r.Run(fmt.Sprintf(":%d", setting.Conf.Port)); err != nil {
-      fmt.Println("server startup failed, err:%v\n", err)
+  package main
+  
+  func main() {
+  	// 启动web程序
+  	router.Run()
   }
   ```
 
-- routers.go
+- conf/conf_system.go
 
   ```go
-  package routers
+  package conf
+  
+  import "fmt"
+  
+  type System struct {
+  	IP   string `yaml:"ip"`
+  	Port int    `yaml:"port"`
+  }
+  
+  func (s System) Addr() string {
+  	return fmt.Sprintf("%s:%d", s.IP, s.Port)
+  }
+  ```
+
+- api/enter.go
+
+  ```go
+  package api
+  
+  import "blogx_server/api/site_api"
+  
+  type Api struct {
+  	SiteApi site_api.SiteApi
+  }
+  
+  var App = Api{}
+  ```
+
+- api/site_api/enter.go
+
+  ```go
+  package site_api
   
   import (
-  	"bubble/controller"
+  	"fmt"
   	"github.com/gin-gonic/gin"
   )
   
-  func SetupRouter() *gin.Engine {
-      // 创建路由引擎
-  	r := gin.Default()
-  	// 告诉gin框架模板文件引用的静态文件去哪里找
-  	r.Static("/static", "static")
-  	// 告诉gin框架去哪里找模板文件
-  	r.LoadHTMLGlob("templates/*")
-      // 返回index.html
-  	r.GET("/", controller.IndexHandler)
+  type SiteApi struct {
+  }
   
-  	// 配置路由组
-  	v1Group := r.Group("v1")
-  	{
-  		// 添加
-  		v1Group.POST("/todo", controller.Create)
-  		// 查看
-  		v1Group.GET("/todo", controller.Get)
-  		// 修改
-  		v1Group.PUT("/todo/:id", controller.Update)
-  		// 删除
-  		v1Group.DELETE("/todo/:id", controller.Delete)
-  	}
-  	return r
+  func (SiteApi) SiteInfoView(c *gin.Context) {
+  	fmt.Println("1")
+  	c.JSON(200, gin.H{"code": 0, "msg": "站点信息"})
+  	return
   }
   ```
+
+- router/site_router.go
+
+  ```go
+  package router
+  
+  import (
+  	"blogx_server/api"
+  	"github.com/gin-gonic/gin"
+  )
+  
+  func SiteRouter(r *gin.RouterGroup) {
+  	app := api.App.SiteApi
+  	r.GET("site", app.SiteInfoView)
+  }
+  ```
+
+- router/enter.go
+
+  ```go
+  package router
+  
+  import (
+  	"blogx_server/global"
+  	"github.com/gin-gonic/gin"
+  )
+  
+  func Run() {
+  	r := gin.Default()
+  
+  	nr := r.Group("/api")
+  
+  	SiteRouter(nr)
+  
+  	addr := global.Config.System.Addr()
+  	r.Run(addr)
+  }
+  ```
+
+###### 路由响应
+
+| **场景**     | **方法**                |
+| :----------- | :---------------------- |
+| API 数据交互 | `c.JSON()` / `c.XML()`  |
+| 网页渲染     | `c.HTML()`              |
+| 文件传输     | `c.File()` / `c.Data()` |
+| 流式处理     | `c.Stream()`            |
+| 重定向       | `c.Redirect()`          |
+| 静态资源托管 | `router.Static()`       |
+
+###### 静态路由配置
+
+- **静态资源托管**：将本地目录中的文件（如 HTML、CSS、JS、图片）映射到 Web 服务器的指定路由路径。
+- **简化访问**：用户可通过 URL 直接访问静态文件，无需编写额外路由逻辑。
+
+```go
+package main
+
+import "github.com/gin-gonic/gin"
+
+func main() {
+    r := gin.Default()
+
+    // 将 "./public" 目录下的文件映射到 "/static" 路径
+    r.Static("/static", "./public")
+
+    r.Run(":8080")
+}
+```
+
+
 
 ##### 用户模块开发
 
@@ -624,11 +1402,271 @@ func FlagDB() {
 
 ##### 中间件开发
 
+```go
+package main
+
+import (
+	"github.com/gin-gonic/gin"
+)
+
+func main() {
+	r := gin.Default()
+    nr := r.Group("/api")
+    nr.Use(middleware ...HandlerFunc)  // 路由组中使用中间件
+    // 单个路由中使用中间件
+    r.PUT("site", middleware.AdminMiddleware, app.SiteUpdateView)
+}
+```
+
+- 中间件执行流程控制
+  - 默认顺序：Gin 的中间件按照注册顺序依次执行。
+- **`c.Next()` 的作用**：
+  - 在调用 `c.Next()` 时，Gin 会暂停当前中间件的执行。
+    - **执行后续中间件和路由处理函数**。
+    - 当后续所有操作完成后，返回到当前中间件继续执行 `c.Next()` 之后的代码。
+
+- **`c.Abort()`**：终止后续中间件和路由的执行，直接返回响应。
+
+
+
 ###### 认证
+
+
+
+
 
 ###### 权限
 
+- 管理员权限校验
+
+  ```go
+  type RoleType int8
+  
+  const (
+  	AdminRole   RoleType = 1
+  	UserRole    RoleType = 2
+  	VisitorRole RoleType = 3
+  )
+  
+  func ParseTokenByGin(c *gin.Context) (*MyClaims, error) {
+  	token := c.GetHeader("token")
+  	if token == "" {
+  		token = c.Query("token")
+  	}
+  
+  	return ParseToken(token)
+  }
+  
+  func AdminMiddleware(c *gin.Context) {
+  	claims, err := jwts.ParseTokenByGin(c)
+  	if err != nil {
+  		res.FailWithError(err, c)
+  		c.Abort()
+  		return
+  	}
+  	if claims.Role != enum.AdminRole {
+  		res.FailWithMsg("权限错误", c)
+  		c.Abort()
+  		return
+  	}
+  	blcType, ok := redis_jwt.HasTokenBlackByGin(c)
+  	if ok {
+  		res.FailWithMsg(blcType.Msg(), c)
+  		c.Abort()
+  		return
+  	}
+  	c.Set("claims", claims)
+  }
+  ```
+
+
+
 ###### 限流
 
-###### 分页
+##### 文件管理
+
+###### 文件上传
+
+- 核心
+
+  ```go
+  func ImageUploadView(c *gin.Context) {
+  	fileHeader, err := c.FormFile("file")
+      filePath := fmt.Sprintf("uploads/%s/%s.%s", UploadDir, hash, suffix)
+      c.SaveUploadedFile(fileHeader, filePath)
+  }
+  ```
+
+- 案例
+
+  ```go
+  // api/image_api/image_upload.go
+  package image_api
+  
+  import (
+  	"blogx_server/common/res"
+  	"blogx_server/global"
+  	"blogx_server/models"
+  	"blogx_server/utils"
+  	"fmt"
+  	"github.com/gin-gonic/gin"
+  	"github.com/pkg/errors"
+  	"github.com/sirupsen/logrus"
+  	"io"
+  	"strings"
+  )
+  
+  func (ImageApi) ImageUploadView(c *gin.Context) {
+  	fileHeader, err := c.FormFile("file")
+  	if err != nil {
+  		res.FailWithError(err, c)
+  		return
+  	}
+  	// 文件大小判断
+  	s := global.Config.Upload.Size
+  	if fileHeader.Size > s*1024*1024 {
+  		res.FailWithMsg(fmt.Sprintf("文件大小大于%dMB", s), c)
+  		return
+  	}
+  	// 后缀判断
+  	filename := fileHeader.Filename
+  	suffix, err := imageSuffixJudge(filename)
+  	if err != nil {
+  		res.FailWithError(err, c)
+  		return
+  	}
+  	// 文件hash
+  	file, err := fileHeader.Open()
+  	if err != nil {
+  		res.FailWithError(err, c)
+  		return
+  	}
+  	byteData, _ := io.ReadAll(file)
+  	hash := utils.Md5(byteData)
+  	// 判断这个hash有没有
+  	var model models.ImageModel
+  	err = global.DB.Take(&model, "hash = ?", hash).Error
+  	if err == nil {
+  		// 找到了
+  		logrus.Infof("上传图片重复 %s <==> %s  %s", filename, model.Filename, hash)
+  		res.Ok(model.WebPath(), "上传成功", c)
+  		return
+  	}
+  
+  	// 文件名称一样，但是文件内容不一样
+  
+  	filePath := fmt.Sprintf("uploads/%s/%s.%s", global.Config.Upload.UploadDir, hash, suffix)
+  	// 入库
+  	model = models.ImageModel{
+  		Filename: filename,
+  		Path:     filePath,
+  		Size:     fileHeader.Size,
+  		Hash:     hash,
+  	}
+  	err = global.DB.Create(&model).Error
+  	if err != nil {
+  		res.FailWithError(err, c)
+  		return
+  	}
+  
+  	c.SaveUploadedFile(fileHeader, filePath)
+  	res.Ok(model.WebPath(), "图片上传成功", c)
+  
+  }
+  
+  func imageSuffixJudge(filename string) (suffix string, err error) {
+  	_list := strings.Split(filename, ".")
+  	if len(_list) == 1 {
+  		err = errors.New("错误的文件名")
+  		return
+  	}
+  	// xxx.jpg   xxx  xxx.jpg.exe
+  	suffix = _list[len(_list)-1]
+  	if !utils.InList(suffix, global.Config.Upload.WhiteList) {
+  		err = errors.New("文件非法")
+  		return
+  	}
+  	return
+  }
+  ```
+
+###### 文件获取
+
+
+
+
+
+###### 文件删除
+
+- 主函数
+
+  ```go
+  func (ImageApi) ImageRemoveView(c *gin.Context) {
+  	var cr models.RemoveRequest
+  	err := c.ShouldBindJSON(&cr)
+  	if err != nil {
+  		res.FailWithError(err, c)
+  		return
+  	}
+  	log := log_service.GetLog(c)
+  	log.ShowRequest()
+  	log.ShowResponse()
+  
+  	var list []models.ImageModel
+  	global.DB.Find(&list, "id in ?", cr.IDList)
+  
+  	var successCount, errCount int64
+  	if len(list) > 0 {
+  		successCount = global.DB.Delete(&list).RowsAffected
+  	}
+  	errCount = int64(len(list)) - successCount
+  
+  	msg := fmt.Sprintf("操作成功，成功%d 失败%d", successCount, errCount)
+  
+  	res.OkWithMsg(msg, c)
+  }
+  ```
+
+- 数据库钩子（Hook）函数
+
+  ```go
+  type ImageModel struct {
+  	Model
+  	Filename string `gorm:"size:64" json:"filename"`
+  	Path     string `gorm:"size:256" json:"path"`
+  	Size     int64  `json:"size"`
+  	Hash     string `gorm:"size:32" json:"hash"`
+  }
+  
+  // 删除前自动触发该钩子函数
+  func (l ImageModel) BeforeDelete(tx *gorm.DB) error {
+  	err := os.Remove(l.Path)
+  	if err != nil {
+  		logrus.Warnf("删除文件失败 %s", err)
+  	}
+  	return nil
+  }
+  ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

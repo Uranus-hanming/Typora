@@ -1,0 +1,31 @@
+1. api接口文件
+	主入口enter.go
+2. 公共文件common
+3. 配置文件 conf
+	主入口enter.go
+	数据库配置
+	日志配置
+	系统配置
+4. 核心逻辑文件 core
+	配置初始化
+	数据库初始化
+	日志初始化
+5. 参数文件 flags
+	主入口enter.go
+6. 全局文件 global
+	主入口enter.go
+7. 日志文件 logs
+8. 模型文件 models
+	主入口enter.go
+9. 中间件middleware
+10. 路由文件router
+	主入口enter.go
+11. 服务文件 service
+12. 测试文件 testdata
+13. 文件上传 uploads
+14. 功能文件 utils
+15. 项目主入口main.go
+
+
+
+
