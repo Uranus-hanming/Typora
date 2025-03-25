@@ -1,3 +1,4 @@
+```
 asyncio 的运算核心：event loop
 	他面对很多可以执行的任务，然后决定执行哪个任务
 coroutine: 
@@ -25,6 +26,7 @@ coroutine:
 					并且这个list的顺序和里面 task 的顺序是一致的。
 task: 
 python 运行的单进程单线程的程序，所以同时执行的任务只有一个，不存在系统级的上下文切换，即asyncio并不能提升你的运算速度，比较适合处理那些需要等待的任务，典型的如网络通讯
+```
 
 import asyncio
 import time

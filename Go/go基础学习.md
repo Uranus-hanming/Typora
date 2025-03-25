@@ -19,9 +19,135 @@
 - 使用Docker部署Go Web应用：https://www.liwenzhou.com/posts/Go/deploy-in-docker/
 - 部署Go语言项目的 N 种方法：https://www.liwenzhou.com/posts/Go/deploy/
 
+##### 类型的分类
+
+###### 1. 基本类型（Primitive Types）
+
+- **布尔型（Boolean）**
+  `bool`：值为 `true` 或 `false`。
+- **数值类型（Numeric）**
+  - **整数**：
+    - 有符号整数：`int8`, `int16`, `int32`（`rune`）, `int64`, `int`（平台相关，32/64位）。
+    - 无符号整数：`uint8`（`byte`）, `uint16`, `uint32`, `uint64`, `uint`（平台相关）。
+    - 特殊类型：`uintptr`（用于存储指针的整数）。
+  - **浮点数**：
+    - `float32`（单精度）、`float64`（双精度）。
+  - **复数**：
+    - `complex64`（`float32` 实部和虚部）、`complex128`（`float64` 实部和虚部）。
+- **字符串（String）**
+  `string`：不可变的 UTF-8 字符序列。
+
+###### 2. 复合类型（Composite Types）
+
+由基本类型或其他复合类型组合而成：
+
+- **数组（Array）**
+  固定长度的元素序列：
+
+  ```go
+  var arr [5]int // 包含 5 个 int 的数组
+  ```
+
+- **切片（Slice）**
+  动态长度的数组视图：
+
+  ```go
+  var s []int // 可扩展的切片
+  ```
+
+- **结构体（Struct）**
+  组合多个字段的自定义类型：
+
+  ```go
+  type User struct {
+      Name string
+      Age  int
+  }
+  ```
+
+- **映射（Map）**
+  键值对的集合：
+
+  ```go
+  var m map[string]int // 键为 string，值为 int
+  ```
+
+- **指针（Pointer）**
+  指向变量的内存地址：
+
+  ```go
+  var p *int // 指向 int 的指针
+  ```
+
+- **通道（Channel）**
+  用于协程（goroutine）间通信：
+
+  ```go
+  var ch chan int // 传递 int 的通道
+  ```
+
+###### 3. 接口类型（Interface Types）
+
+定义一组方法签名，用于多态：
+
+- **普通接口**：
+
+  ```go
+  type Writer interface {
+      Write([]byte) (int, error)
+  }
+  ```
+
+- **空接口（`interface{}`）**：
+  可接受任意类型的值：
+
+  ```go
+  var any interface{} = 42 // 存储任意类型
+  ```
+
+###### 4. 函数类型（Function Types）
+
+表示函数签名，可作为变量或参数传递：
+
+```go
+type Adder func(a, b int) int
+```
+
+###### 5. 自定义类型（Custom Types）
+
+通过 `type` 关键字定义的新类型：
+
+- **基于现有类型**：
+
+  ```go
+  type Celsius float64 // 新类型，基于 float64
+  ```
+
+- **类型别名**：
+
+  ```go
+  type Alias = int // 别名，与 int 完全等价
+  ```
+
+###### 6. 错误类型（Error Type）
+
+内置的 `error` 接口类型，用于错误处理：
+
+```go
+type error interface {
+    Error() string
+}
+```
+
+###### 7. 特殊类型
+
+- **`rune`**：`int32` 的别名，表示 Unicode 码点。
+- **`byte`**：`uint8` 的别名，表示原始二进制数据。
+- **`nil`**：指针、通道、函数、接口、映射或切片的零值。
+
 ##### go关键字
 
-> 程序一般由关键字、常量、变量、运算符、类型和函数组成。
+> 程序一般由**关键字**、**常量**、**变量**、**运算符**、**类型**和**函数**组成。
 >
 > 程序中可能会使用到这些分隔符：括号 ()，中括号 [] 和大括号 {}。
 >
@@ -514,6 +640,110 @@ for index, value := range collection {
 ###### append
 
 
+
+###### cap
+
+>  获取 **切片（slice）**、**数组（array）** 或 **通道（channel）** 的 **容量**。
+
+```go
+s := make([]int, 3, 5) // 切片长度3，容量5
+fmt.Println(cap(s))    // 输出: 5
+
+ch := make(chan int, 10)
+fmt.Println(cap(ch))   // 输出: 10（通道缓冲区容量）
+```
+
+###### close
+
+>  关闭 **通道（channel）**，表示不再向通道发送数据。
+
+- 关闭后的通道无法再发送数据（发送会 panic）。
+- 接收操作可以继续读取剩余数据，直到通道为空。
+
+```go
+ch := make(chan int)
+go func() {
+    ch <- 1
+    close(ch) // 关闭通道
+}()
+for v := range ch { // 循环会自动退出
+    fmt.Println(v)
+}
+```
+
+###### imag
+
+> 获取 **复数（complex number）** 的虚部。
+
+```go
+c := complex(3, 4) // 3 + 4i
+fmt.Println(imag(c)) // 输出: 4
+```
+
+###### iota
+
+- 每遇到一个 `const` 关键字，`iota` 重置为 0。
+- 每声明一行常量，`iota` 自动递增 1。
+
+```go
+const (
+    A = iota // 0
+    B        // 1
+    C        // 2
+)
+const (
+    D = iota << 1 // 0 << 1 = 0
+    E             // 1 << 1 = 2
+)
+```
+
+###### panic
+
+> 触发 **运行时恐慌（panic）**，终止当前函数的执行，并逐层向上触发 `defer`
+
+- 若未通过 `recover` 捕获，程序会崩溃并打印堆栈信息。
+
+```go
+func risky() {
+    panic("发生严重错误！")
+}
+```
+
+###### real
+
+> 获取 **复数（complex number）** 的实部。
+
+```go
+c := complex(3, 4) // 3 + 4i
+fmt.Println(real(c)) // 输出: 3
+```
+
+###### recover
+
+> 捕获 **panic** 并恢复程序执行，只能在 `defer` 函数中使用。
+
+```go
+func safeCall() {
+    defer func() {
+        if err := recover(); err != nil {
+            fmt.Println("捕获到 panic:", err)
+        }
+    }()
+    panic("手动触发 panic")
+}
+```
+
+###### uintptr
+
+> 一种无符号整数类型，用于存储指针的位模式（内存地址）。
+
+- 与 `unsafe` 包配合，进行底层指针操作。
+- 通常用于与 C 语言交互或系统级编程。
+
+```go
+var x int = 42
+ptr := uintptr(unsafe.Pointer(&x)) // 将指针转换为 uintptr
+```
 
 
 
@@ -1117,13 +1347,21 @@ func main() {
 var b bool = true
 ```
 
-###### 2. 数字类型
+###### 2. 数值类型
 
 - 整型：int
   - uint8、int8
+  
+    > byte是uint8的别名
+  
   - uint16、int16
+  
   - uint32、int32
+  
+    > rune是int32的别名，用来表示Unicode码点。
+  
   - uint64、int64
+  
 - 浮点型：float32、float64、complex64、complex128
 
 ###### 3. 字符串类型
@@ -1133,12 +1371,29 @@ var b bool = true
 ###### 4. 派生类型
 
 1. 指针类型（Pointer）
+
+   > 指向变量的内存地址
+
 2. 数组类型
+
+   > 数组是固定长度的元素序列，比如[5]int
+
 3. 结构化类型（struct）
+
 4. Channel 类型
+
+   > 用于goroutine之间的通信
+
 5. 函数类型（fun）
+
 6. 切片类型（slice）
+
+   > 是基于数组的动态视图，更灵活
+
 7. 接口类型（interface）
+
+   > 定义了一组方法签名
+
 8. Map 类型（map）
 
 ##### 指针类型
@@ -1298,14 +1553,17 @@ var b bool = true
   **注意**：`label` 标签不是 Go 标准库或 Gin 内置的标签，需要开发者自行解析（或通过第三方库实现）。
 
 4. `gorm`（数据库 ORM）
+   
    - 用于定义数据库表的字段约束（需配合 GORM 框架）
-
+   
 5. `form`（表单绑定）
+   
    - 用于 Gin 框架的表单参数绑定（即URL中?后面所带的参数）
-
+   
 6. `xml`（XML 编码）
+   
    - 控制 XML 序列化/反序列化的字段名称
-
+   
 7. `yaml`（YAML 编码）
 
    - 控制 YAML 序列化/反序列化的字段名称
@@ -1319,11 +1577,13 @@ var b bool = true
 8. `bson`（MongoDB 驱动）
 
 9. `validate`（通用验证）
+   
    - 通用参数验证（需配合验证库如 `go-playground/validator`）
-
+   
 10. `db`（SQL 数据库驱动）
+    
     - 用于 SQL 查询的字段映射（如 `sqlx` 或 `gorm`）
-
+    
 11. `mapstructure`（配置解析）
 
     - 用于将 `map` 数据解码到结构体（如 Viper 配置管理）
@@ -1549,12 +1809,10 @@ var b bool = true
 
 ```go
 /* 定义接口 */
-type interface_name interface {
-   method_name1 [return_type]
-   method_name2 [return_type]
-   method_name3 [return_type]
-   ...
-   method_namen [return_type]
+type 接口名 interface {
+    方法1(参数列表) 返回值列表
+    方法2(参数列表) 返回值列表
+    // ...
 }
 
 /* 定义结构体 */
@@ -1786,6 +2044,154 @@ func main() {
         fmt.Println(i == nil) // 输出：true
 }
 ```
+
+##### 接口和结构体的区别
+
+> 结构体通过实现接口的方法，满足接口的约束。
+>
+> 接口变量可以持有结构体实例，实现多态调用。
+>
+> **接口管行为，结构体管数据**
+
+###### 一、接口（Interface）的核心
+
+1. 接口是什么？
+
+   - **接口是一组方法的集合**，只定义方法的签名（名称、参数、返回值），不包含具体实现。
+
+   - **目的**：约束类型必须实现某些方法，实现多态性和解耦。
+
+2. 接口的示例
+
+   ```go
+   package main
+   
+   import "fmt"
+   
+   // 定义一个 "说话" 接口
+   type Speaker interface {
+   	Speak() string // 方法签名
+   }
+   
+   type Dog struct{}
+   
+   // Dog 实现 Speaker 接口
+   func (d Dog) Speak() string {
+   	return "汪汪！"
+   }
+   
+   type Cat struct{}
+   
+   // Cat 实现 Speaker 接口
+   func (c Cat) Speak() string {
+   	return "喵喵！"
+   }
+   
+   // 使用接口类型接收不同结构体
+   func MakeSound(s Speaker) {
+   	fmt.Println(s.Speak())
+   }
+   
+   func main() {
+   	dog := Dog{}
+   	cat := Cat{}
+   	MakeSound(dog) // 输出: 汪汪！
+   	MakeSound(cat) // 输出: 喵喵！
+   }
+   ```
+
+###### 二、结构体（Struct）的核心作用
+
+1. 结构体是什么？
+
+   - **结构体是数据的集合**，可以包含多个不同类型的字段。
+
+   - **目的**：存储具体的数据，定义数据结构。
+
+2. 结构体的示例
+
+###### 三、接口与结构体的关键区别
+
+| **特性**     | **接口（Interface）**          | **结构体（Struct）**              |
+| :----------- | :----------------------------- | :-------------------------------- |
+| **本质**     | 定义方法签名（行为规范）       | 定义数据结构（字段集合）          |
+| **实现方式** | 隐式实现（无需显式声明）       | 显式定义字段和方法                |
+| **实例化**   | 不能直接实例化，需赋值具体类型 | 可以直接实例化（`p := Person{}`） |
+| **零值**     | `nil`（未赋值时）              | 各字段的零值（如 `""`、`0`）      |
+| **多态性**   | 支持（同一接口不同实现）       | 不支持                            |
+| **主要用途** | 解耦、多态、定义行为           | 存储数据、封装状态                |
+
+###### 四、接口的实际应用场景
+
+1. 多态处理
+
+   不同结构体实现同一接口，统一调用：
+
+   ```go
+   type Payment interface {
+       Pay(amount float64) error
+   }
+   
+   type CreditCard struct{}
+   func (c CreditCard) Pay(amount float64) error { /* 信用卡支付逻辑 */ }
+   
+   type Alipay struct{}
+   func (a Alipay) Pay(amount float64) error { /* 支付宝支付逻辑 */ }
+   
+   // 统一处理支付
+   func ProcessPayment(p Payment, amount float64) {
+       p.Pay(amount)
+   }
+   ```
+
+2. 依赖注入
+
+   通过接口解耦模块依赖：
+
+   ```go
+   type Logger interface {
+       Log(message string)
+   }
+   
+   type Service struct {
+       logger Logger // 依赖接口
+   }
+   
+   func (s *Service) DoWork() {
+       s.logger.Log("工作开始")
+   }
+   
+   // 使用不同日志实现
+   type FileLogger struct{}
+   func (f FileLogger) Log(message string) { /* 写入文件 */ }
+   
+   type ConsoleLogger struct{}
+   func (c ConsoleLogger) Log(message string) { /* 打印到控制台 */ }
+   ```
+
+五、结构体的实际应用场景
+
+1. 定义数据模型
+
+   ```go
+   type User struct {
+       ID       int
+       Username string
+       Email    string
+   }
+   ```
+
+2. 封装方法
+
+   ```go
+   func (u *User) UpdateEmail(newEmail string) {
+       u.Email = newEmail
+   }
+   ```
+
+
+
+
 
 ##### map类型
 
